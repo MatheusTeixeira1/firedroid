@@ -1,12 +1,3 @@
-:root {
-    --laranja: #ED7D31;
-    --marrom-escuro: #4F4A45;
-    --preto: #1A1A1A;
-    --braco: #F6F1EE;
-}
-body{
-    width: 100%;
-}
 main{
     width: 100%;
     height: 100vh;
@@ -44,15 +35,9 @@ footer{
     height: 64px;
     background-color: var(--laranja);
 }
-footer a {
-    font-size: 16px; /* Tamanho inicial */
-    transition: font-size 0.3s ease; /* Transição suave de 0.3 segundos */
-}
 
-footer a:hover {
-    font-size: 24px;
-    color: white;
-}
+
+
 /* Adicionando a animação idle */
 @keyframes floatAnimation {
     0%, 100% {

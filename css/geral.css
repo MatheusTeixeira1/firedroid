@@ -3,6 +3,12 @@
     padding: 0;
     margin: 0;
 }
+:root {
+  --laranja: #ED7D31;
+  --marrom-escuro: #4F4A45;
+  --preto: #1A1A1A;
+  --braco: #F6F1EE;
+}
 @font-face {
     font-family: 'MuktaVaani';
     src: url('fonts/MuktaVaani-Regular.ttf') format('truetype'),
@@ -15,4 +21,16 @@
   
   body {
     font-family: 'MuktaVaani', sans-serif;
+    width: 100%;
   }
+
+  a{
+    text-decoration: none;
+    color: var(--preto);
+    font-size: 16px; /* Tamanho inicial */
+    transition: font-size 0.3s ease; /* Transição suave de 0.3 segundos */
+  }
+  a:hover {
+    font-size: 24px;
+    color: white;
+}
