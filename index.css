@@ -30,6 +30,7 @@ main{
 #logo img{
     height: 384px;
 }
+
 footer{
     display: flex;
     align-items: center;
@@ -42,6 +43,15 @@ footer{
     width: 100%;
     height: 64px;
     background-color: var(--laranja);
+}
+footer a {
+    font-size: 16px; /* Tamanho inicial */
+    transition: font-size 0.3s ease; /* Transição suave de 0.3 segundos */
+}
+
+footer a:hover {
+    font-size: 24px;
+    color: white;
 }
 /* Adicionando a animação idle */
 @keyframes floatAnimation {
