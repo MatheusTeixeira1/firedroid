@@ -7,5 +7,4 @@ function nextSlide() {
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 }
 
-// Muda de slide a cada 3 segundos
-setInterval(nextSlide, 5000);
+setInterval(nextSlide, 4000);

@@ -38,7 +38,7 @@ footer{
 
 
 
-/* Adicionando a animação idle */
+/* animação idle */
 @keyframes floatAnimation {
     0%, 100% {
         transform: translateY(0);

@@ -1,36 +1,36 @@
 *{
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 :root {
-  --laranja: #ED7D31;
-  --marrom-escuro: #4F4A45;
-  --preto: #1A1A1A;
-  --braco: #F6F1EE;
+--laranja: #ED7D31;
+--marrom-escuro: #4F4A45;
+--preto: #1A1A1A;
+--braco: #F6F1EE;
 }
 @font-face {
-    font-family: 'MuktaVaani';
-    src: url('fonts/MuktaVaani-Regular.ttf') format('truetype'),
-         url('fonts/MuktaVaani-Regular.woff') format('woff'),
-         url('fonts/MuktaVaani-Regular.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap; /* Melhora o carregamento */
-  }
-  
-  body {
-    font-family: 'MuktaVaani', sans-serif;
-    width: 100%;
-  }
+  font-family: 'MuktaVaani';
+  src: url('fonts/MuktaVaani-Regular.ttf') format('truetype'),
+        url('fonts/MuktaVaani-Regular.woff') format('woff'),
+        url('fonts/MuktaVaani-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; 
+}
 
-  a{
-    text-decoration: none;
-    color: var(--preto);
-    font-size: 16px; /* Tamanho inicial */
-    transition: font-size 0.3s ease; /* Transição suave de 0.3 segundos */
-  }
-  a:hover {
-    font-size: 24px;
-    color: white;
+body {
+  font-family: 'MuktaVaani', sans-serif;
+  width: 100%;
+}
+
+a{
+  text-decoration: none;
+  color: var(--preto);
+  font-size: 16px; 
+  transition: font-size 0.3s ease; 
+}
+a:hover {
+  font-size: 24px;
+  color: white;
 }
