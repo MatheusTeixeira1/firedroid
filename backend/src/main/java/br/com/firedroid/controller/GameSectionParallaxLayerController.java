@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.firedroid.DTOs.CreateGameSectionParallaxLayer;
 import br.com.firedroid.DTOs.GameSectionParallaxLayerAdminResponse;
 import br.com.firedroid.DTOs.GameSectionParallaxLayerPublicResponse;
+import br.com.firedroid.DTOs.UpdateGameSectionParallaxLayer;
 import br.com.firedroid.service.GameSectionParallaxLayerService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/game/section/parallaxLayer")
+@RequestMapping("/api/game/section/parallax-layer")
 public class GameSectionParallaxLayerController {
 	@Autowired
 	private GameSectionParallaxLayerService service;
@@ -28,7 +29,7 @@ public class GameSectionParallaxLayerController {
 	// ----- Para usuarios -----
 	@GetMapping
 	public ResponseEntity<List<GameSectionParallaxLayerPublicResponse>> getAll() {
-		List<GameSectionParallaxLayerPublicResponse> layers = sevice.getAll();
+		List<GameSectionParallaxLayerPublicResponse> layers = service.getAll();
 		return ResponseEntity.ok(layers);
 	}
 
@@ -61,7 +62,7 @@ public class GameSectionParallaxLayerController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody GameSectionParallaxLayerController request) {
+	public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateGameSectionParallaxLayer request) {
 		service.update(id, request);
 		return ResponseEntity.ok().build();
 	}
