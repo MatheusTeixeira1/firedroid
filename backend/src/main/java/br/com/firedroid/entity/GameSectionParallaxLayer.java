@@ -1,12 +1,15 @@
 package br.com.firedroid.entity;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "game_section_parallax_layers")
-public class GameSectionParallaxLayer {
-
+public class GameSectionParallaxLayer implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

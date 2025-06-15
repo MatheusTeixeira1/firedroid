@@ -1,7 +1,9 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.game;
 
 import java.util.List;
 
+import br.com.firedroid.DTOs.game_section.GameSectionPublicResponse;
+import br.com.firedroid.DTOs.page_theme.PageThemePublicResponse;
 import br.com.firedroid.entity.Game;
 
 public record GamePublicResponse(
@@ -13,6 +15,7 @@ public record GamePublicResponse(
     String epicLink,
     String itchioLink,
     String siteLink,
+    PageThemePublicResponse pageTheme,
     List<GameSectionPublicResponse> sections
 ) {
 	public static GamePublicResponse fromEntity(Game game) {
@@ -25,6 +28,7 @@ public record GamePublicResponse(
             game.getEpicLink(),
             game.getItchioLink(),
             game.getSiteLink(),
+            PageThemePublicResponse.fromEntity(game.getPageTheme()),
             game.getSections().stream()
                 .map(GameSectionPublicResponse::fromEntity)
                 .toList()

@@ -13,22 +13,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.firedroid.DTOs.GameAdminResponse;
-import br.com.firedroid.DTOs.GamePublicResponse;
-import br.com.firedroid.DTOs.CreateGameRequest;
-import br.com.firedroid.DTOs.CreateGameSectionRequest;
-import br.com.firedroid.DTOs.GameSectionAdminResponse;
-import br.com.firedroid.DTOs.GameSectionPublicResponse;
-import br.com.firedroid.DTOs.UpdateGameSectionRequest;
+import br.com.firedroid.DTOs.game_section.GameSectionRequest;
+import br.com.firedroid.DTOs.MessageResponse;
+import br.com.firedroid.DTOs.game_section.GameSectionAdminResponse;
+import br.com.firedroid.DTOs.game_section.GameSectionPublicResponse;
 import br.com.firedroid.service.GameSectionService;
-import br.com.firedroid.service.GameService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/game/section")
 public class GameSectionController {
-	@Autowired
-	private GameService gameService;
+
 	@Autowired
 	private GameSectionService gameSectionService;
 
@@ -61,21 +56,21 @@ public class GameSectionController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Void> create(@Valid @RequestBody CreateGameSectionRequest request) {
+	public ResponseEntity<MessageResponse> create(@Valid @RequestBody GameSectionRequest request) {
 		gameSectionService.create(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Seção criado com sucesso!"));
 		
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateGameSectionRequest request) {
+	public ResponseEntity<MessageResponse> update(@PathVariable Long id, @Valid @RequestBody GameSectionRequest request) {
 		gameSectionService.update(id, request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Seção criado com sucesso!"));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {
 		gameSectionService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(new MessageResponse("Seção deletada com sucesso!"));
 	}
 }

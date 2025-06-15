@@ -1,8 +1,10 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.game;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import br.com.firedroid.DTOs.game_section.GameSectionAdminResponse;
+import br.com.firedroid.DTOs.page_theme.PageThemeAdminResponse;
 import br.com.firedroid.entity.Game;
 
 public record GameAdminResponse(
@@ -14,6 +16,7 @@ public record GameAdminResponse(
     String epicLink,
     String itchioLink,
     String siteLink,
+    PageThemeAdminResponse pageTheme,
     List<GameSectionAdminResponse> sections,
     String createdBy,
     String updatedBy,
@@ -30,6 +33,7 @@ public record GameAdminResponse(
             game.getEpicLink(),
             game.getItchioLink(),
             game.getSiteLink(),
+            PageThemeAdminResponse.fromEntity(game.getPageTheme()),
             game.getSections().stream()
                 .map(GameSectionAdminResponse::fromEntity)
                 .toList(),

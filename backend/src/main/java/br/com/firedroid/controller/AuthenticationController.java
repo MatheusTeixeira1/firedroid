@@ -11,14 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.firedroid.DTOs.AuthenticationDTO;
-import br.com.firedroid.DTOs.LoginResponseDTO;
-import br.com.firedroid.DTOs.RegisterDTO;
+import br.com.firedroid.DTOs.auth.AuthenticationDTO;
+import br.com.firedroid.DTOs.auth.LoginResponseDTO;
+import br.com.firedroid.DTOs.auth.RegisterDTO;
 import br.com.firedroid.entity.User;
 import br.com.firedroid.entity.UserRole;
 import br.com.firedroid.repository.UserRepository;
 import br.com.firedroid.security.TokenService;
-import br.com.firedroid.service.AuthenticationService;
 import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -26,10 +25,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
-    AuthenticationController(AuthenticationService authenticationService) {
-    	this.authenticationService = authenticationService;
-    }
+//    private final AuthenticationService authenticationService;
+//    AuthenticationController(AuthenticationService authenticationService) {
+//    	this.authenticationService = authenticationService;
+//    }
     
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -64,7 +63,7 @@ public class AuthenticationController {
         }
     }
     
-    @PostMapping("/registerAdmin")
+    @PostMapping("/register/adm")
     public ResponseEntity<?> registerAdmin(@RequestBody RegisterDTO registerData) {
         if (this.userRepository.findByUsername(registerData.username()) == null) {
             String encryptedPassword = new BCryptPasswordEncoder().encode(registerData.password());

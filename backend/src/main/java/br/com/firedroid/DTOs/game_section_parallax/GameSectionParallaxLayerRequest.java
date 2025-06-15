@@ -1,11 +1,9 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.game_section_parallax;
 
-public record CreateGameSectionParallaxLayer(
+public record GameSectionParallaxLayerRequest(
 		 String image,
 		 Integer speed,
 	     Integer displayOrder,
 	     Long sectionId
 	    
-		) {
-
-}
+		) {}

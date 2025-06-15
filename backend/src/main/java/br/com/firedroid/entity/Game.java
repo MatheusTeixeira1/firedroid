@@ -2,14 +2,15 @@ package br.com.firedroid.entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "games")
-public class Game {
-
+public class Game implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -38,7 +39,15 @@ public class Game {
 	@OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("displayOrder ASC")
 	private List<GameSection> sections;
-
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "page_theme", nullable = false)
+	private PageTheme pageTheme;
+	
+//	@ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "game_id", nullable = false)
+//    private FeaturedGames featured;
+	
 //	----- Auditoria -----
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "created_by", nullable = false, updatable = false)
@@ -55,6 +64,10 @@ public class Game {
 	private LocalDateTime updatedAt;
 
 //	----- Uteis	-----
+	public Long pageThemeId() {
+        return this.pageTheme != null ? this.pageTheme.getId() : null;
+    }
+
 	public void addSection(GameSection section) {
 		sections.add(section);
 		section.setGame(this);
@@ -95,6 +108,8 @@ public class Game {
 	public Game() {
 		super();
 	}
+
+	
 
 	public Long getId() {
 		return id;
@@ -199,4 +214,14 @@ public class Game {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+	public PageTheme getPageTheme() {
+		return pageTheme;
+	}
+
+	public void setPageTheme(PageTheme pageTheme) {
+		this.pageTheme = pageTheme;
+	}
+	
+	
 }

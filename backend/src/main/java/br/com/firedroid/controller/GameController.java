@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import br.com.firedroid.DTOs.CreateGameRequest;
-import br.com.firedroid.DTOs.GameAdminResponse;
-import br.com.firedroid.DTOs.GamePublicResponse;
+import br.com.firedroid.DTOs.game.GameRequest;
+import br.com.firedroid.DTOs.MessageResponse;
+import br.com.firedroid.DTOs.game.GameAdminResponse;
+import br.com.firedroid.DTOs.game.GamePublicResponse;
 import br.com.firedroid.service.GameService;
 
 @RestController
@@ -49,21 +50,27 @@ public class GameController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Void> create(@Valid @RequestBody CreateGameRequest request) {
+	public ResponseEntity<MessageResponse> create(@Valid @RequestBody GameRequest request) {
 		gameService.create(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Jogo criado com sucesso!"));
 		
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody CreateGameRequest request) {
+	public ResponseEntity<MessageResponse> update(@PathVariable Long id, @Valid @RequestBody GameRequest request) {
 		gameService.update(id, request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Jogo atualizado com sucesso!"));
 	}
 
+	@PatchMapping("{gameId}/chengeTheme/{newThemeId}")
+	public ResponseEntity<MessageResponse> chengeTheme(@PathVariable Long gameId, @PathVariable Long newThemeId) {
+		gameService.chengeTheme(gameId, newThemeId);
+		return ResponseEntity.ok(new MessageResponse("Tema do jogo alterado com sucesso!"));
+	}
+	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {
 		gameService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(new MessageResponse("Jogo deletado com sucesso!"));
 	}
 }

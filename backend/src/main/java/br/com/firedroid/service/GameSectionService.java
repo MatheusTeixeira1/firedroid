@@ -4,21 +4,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import br.com.firedroid.DTOs.CreateGameRequest;
-import br.com.firedroid.DTOs.CreateGameSectionRequest;
-import br.com.firedroid.DTOs.GameSectionAdminResponse;
-import br.com.firedroid.DTOs.GameSectionPublicResponse;
-import br.com.firedroid.DTOs.UpdateGameSectionRequest;
+import br.com.firedroid.DTOs.game_section.GameSectionRequest;
+import br.com.firedroid.DTOs.game_section.GameSectionAdminResponse;
+import br.com.firedroid.DTOs.game_section.GameSectionPublicResponse;
 import br.com.firedroid.entity.Game;
 import br.com.firedroid.entity.GameSection;
 import br.com.firedroid.entity.User;
+import br.com.firedroid.exception.CustomEntityNotFoundException;
+import br.com.firedroid.exception.DuplicateDisplayOrderException;
+import br.com.firedroid.exception.InvalidUsernameException;
 import br.com.firedroid.repository.GameRepository;
 import br.com.firedroid.repository.GameSectionRepository;
 import br.com.firedroid.repository.UserRepository;
-import br.com.firedroid.security.TokenService;
 
 @Service
 public class GameSectionService {
@@ -28,12 +27,6 @@ public class GameSectionService {
 
 	@Autowired
 	private UserRepository userRepository;
-
-	@Autowired
-	private TokenService tokenService;
-
-	@Autowired
-	private GameService gameService;
 
 	@Autowired
 	private GameRepository gameRepository;
@@ -52,10 +45,10 @@ public class GameSectionService {
 	}
 
 	public GameSectionPublicResponse getById(Long id) {
-		GameSection sections = gameSectionRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Jogo com ID " + id + " não encontrado"));
+		GameSection section = gameSectionRepository.findById(id)
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", id)));
 
-		return GameSectionPublicResponse.fromEntity(sections);
+		return GameSectionPublicResponse.fromEntity(section);
 	}
 	// ----- ----- ----- -----
 
@@ -67,24 +60,26 @@ public class GameSectionService {
 	}
 
 	public GameSectionAdminResponse getByIdAdmin(Long id) {
-		GameSection sections = gameSectionRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Jogo com ID " + id + " não encontrado"));
+		GameSection section = gameSectionRepository.findById(id)
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", id)));
 
-		return GameSectionAdminResponse.fromEntity(sections);
+		return GameSectionAdminResponse.fromEntity(section);
 	}
 
-	public void create(CreateGameSectionRequest request) {
+	public void create(GameSectionRequest request) {
 	    String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userRepository.findUserByUsername(username)
-	            .orElseThrow(() -> new UsernameNotFoundException("Usuário autenticado não encontrado"));
+				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
 
 	    Long gameId = request.gameId();
-	    Game game = gameRepository.findById(gameId)
-	            .orElseThrow(() -> new IllegalArgumentException("Jogo com ID " + gameId + " não encontrado"));
 
+	    Game game = gameRepository.findById(gameId)
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Jogo de id %s não encontrado", gameId)));
+	    
 	    boolean displayOrderExists = gameSectionRepository.existsByGameAndDisplayOrder(game, request.displayOrder());
 	    if (displayOrderExists) {
-	        throw new IllegalArgumentException("Já existe uma seção com o displayOrder " + request.displayOrder() + " neste jogo.");
+	        throw new DuplicateDisplayOrderException(
+	        		"Já existe uma entidade com displayOrder=" + request.displayOrder());
 	    }
 
 	    GameSection section = new GameSection();
@@ -97,17 +92,27 @@ public class GameSectionService {
 	    gameSectionRepository.save(section);
 	}
 	
-	public void update(Long id, UpdateGameSectionRequest request) {
-		GameSection section = gameSectionRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Jogo com ID " + id + " não encontrado"));
-
+	public void update(Long id, GameSectionRequest request) {
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
 		User user = userRepository.findUserByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("Usuário autenticado não encontrado"));
-
+				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
+		
+		
+		GameSection section = gameSectionRepository.findById(id)
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", id)));
+		
+		Game game = gameRepository.findById(id)
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Jogo de id %s não encontrado", id)));
+		
+		boolean displayOrderExists = gameSectionRepository.existsByGameAndDisplayOrder(game, request.displayOrder());
+		if (displayOrderExists) {
+			throw new DuplicateDisplayOrderException(
+	        		"Já existe uma entidade com displayOrder=" + request.displayOrder());
+	    }
+		
 		section.setTitle(request.title());
 		section.setText(request.text());
+		section.setDisplayOrder(request.displayOrder());
 		section.setUpdatedBy(user);
 
 		gameSectionRepository.save(section);
@@ -115,8 +120,7 @@ public class GameSectionService {
 
 	public void delete(Long id) {
 		GameSection section = gameSectionRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Jogo com ID " + id + " não encontrado"));
-
+				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", id)));
 		gameSectionRepository.delete(section);
 	}
 }

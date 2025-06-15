@@ -1,6 +1,5 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.game_section_parallax;
 
-import br.com.firedroid.entity.GameSection;
 import br.com.firedroid.entity.GameSectionParallaxLayer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

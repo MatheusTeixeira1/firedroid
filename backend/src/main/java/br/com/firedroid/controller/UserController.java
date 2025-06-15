@@ -6,22 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.com.firedroid.entity.User;
-import br.com.firedroid.repository.UserRepository;
-import br.com.firedroid.security.TokenService;
 import br.com.firedroid.service.UserService;
 
 import java.util.List;
 import java.util.Map;
-
-import java.util.HashMap;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.jsonwebtoken.Claims;
 
 @RestController
 @CrossOrigin(origins = "http://127.0.0.1:5501")
@@ -30,12 +24,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private TokenService tokenService;
     
     @GetMapping
     public List<User> listAll() {

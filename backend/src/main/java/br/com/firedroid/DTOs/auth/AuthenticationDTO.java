@@ -1,5 +1,6 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.auth;
 
-public record AuthenticationDTO(String username, String password) {
-
-}
+public record AuthenticationDTO(
+		String username, 
+		String password
+		) {}

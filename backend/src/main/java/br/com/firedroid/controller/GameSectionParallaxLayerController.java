@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.firedroid.DTOs.CreateGameSectionParallaxLayer;
-import br.com.firedroid.DTOs.GameSectionParallaxLayerAdminResponse;
-import br.com.firedroid.DTOs.GameSectionParallaxLayerPublicResponse;
-import br.com.firedroid.DTOs.UpdateGameSectionParallaxLayer;
+import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerRequest;
+import br.com.firedroid.DTOs.MessageResponse;
+import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerAdminResponse;
+import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerPublicResponse;
 import br.com.firedroid.service.GameSectionParallaxLayerService;
 import jakarta.validation.Valid;
 
@@ -55,21 +55,21 @@ public class GameSectionParallaxLayerController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Void> create(@Valid @RequestBody CreateGameSectionParallaxLayer request) {
+	public ResponseEntity<MessageResponse> create(@Valid @RequestBody GameSectionParallaxLayerRequest request) {
 		service.create(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Camada criado com sucesso!"));
 		
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UpdateGameSectionParallaxLayer request) {
+	public ResponseEntity<MessageResponse> update(@PathVariable Long id, @Valid @RequestBody GameSectionParallaxLayerRequest request) {
 		service.update(id, request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(new MessageResponse("Camada atualizada com sucesso!"));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {
 		service.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(new MessageResponse("Camada deletada com sucesso!"));
 	}
 }

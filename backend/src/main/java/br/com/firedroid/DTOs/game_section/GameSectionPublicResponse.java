@@ -1,7 +1,8 @@
-package br.com.firedroid.DTOs;
+package br.com.firedroid.DTOs.game_section;
 
 import java.util.List;
 
+import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerPublicResponse;
 import br.com.firedroid.entity.GameSection;
 
 
