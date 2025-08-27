@@ -8,17 +8,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerRequest;
 import br.com.firedroid.DTOs.MessageResponse;
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerAdminResponse;
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerPublicResponse;
 import br.com.firedroid.service.GameSectionParallaxLayerService;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/game/section/parallax-layer")
@@ -55,17 +54,27 @@ public class GameSectionParallaxLayerController {
 	}
 
 	@PostMapping
-	public ResponseEntity<MessageResponse> create(@Valid @RequestBody GameSectionParallaxLayerRequest request) {
-		service.create(request);
-		return ResponseEntity.ok(new MessageResponse("Camada criado com sucesso!"));
-		
+	public ResponseEntity<MessageResponse> create(
+	        @RequestParam("image") MultipartFile image,
+	        @RequestParam("speed") Integer speed,
+	        @RequestParam("displayOrder") Integer displayOrder,
+	        @RequestParam("sectionId") Long sectionId
+	) {
+	    GameSectionParallaxLayerRequest request = new GameSectionParallaxLayerRequest(
+	        image, speed, displayOrder, sectionId
+	    );
+	    System.out.println("-----------------------");
+	    service.create(request);
+	    return ResponseEntity.ok(new MessageResponse("Camada criada com sucesso!"));
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<MessageResponse> update(@PathVariable Long id, @Valid @RequestBody GameSectionParallaxLayerRequest request) {
-		service.update(id, request);
-		return ResponseEntity.ok(new MessageResponse("Camada atualizada com sucesso!"));
-	}
+// --------- CONCERTAR ERRO ---------
+	
+//	@PutMapping("/{id}")
+//	public ResponseEntity<MessageResponse> update(@PathVariable Long id, @Valid @RequestBody GameSectionParallaxLayerRequest request) {
+//		service.update(id, request);
+//		return ResponseEntity.ok(new MessageResponse("Camada atualizada com sucesso!"));
+//	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {

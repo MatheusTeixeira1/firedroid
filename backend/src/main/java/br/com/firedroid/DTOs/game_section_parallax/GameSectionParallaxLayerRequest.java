@@ -1,9 +1,10 @@
 package br.com.firedroid.DTOs.game_section_parallax;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record GameSectionParallaxLayerRequest(
-		 String image,
-		 Integer speed,
-	     Integer displayOrder,
-	     Long sectionId
-	    
-		) {}
+    MultipartFile image,
+    Integer speed,
+    Integer displayOrder,
+    Long sectionId
+) {}

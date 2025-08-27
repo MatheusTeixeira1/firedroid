@@ -19,6 +19,16 @@ import br.com.firedroid.repository.GameSectionParallaxLayerRepository;
 import br.com.firedroid.repository.GameSectionRepository;
 import br.com.firedroid.repository.UserRepository;
 
+
+
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+
+
 @Service
 public class GameSectionParallaxLayerService {
 
@@ -70,52 +80,97 @@ public class GameSectionParallaxLayerService {
 		return GameSectionParallaxLayerAdminResponse.fromEntity(layer);
 	}
 	
-	public void create(GameSectionParallaxLayerRequest request) {
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		User user = userRepository.findUserByUsername(username)
-				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    private final String uploadDir = "uploads/parallax"; // caminho relativo
 
-		GameSection section = gameSectionRepository.findById(request.sectionId())
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", request.sectionId())));
+    public void create(GameSectionParallaxLayerRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new InvalidUsernameException("Usuário inválido: " + username));
 
-		boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
-		if (displayOrderExists) {
-			throw new DuplicateDisplayOrderException(
-	        		"Já existe uma camada com displayOrder=" + request.displayOrder());
-		}
+        GameSection section = gameSectionRepository.findById(request.sectionId())
+                .orElseThrow(() -> new CustomEntityNotFoundException("Seção não encontrada"));
 
-		GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
-		layer.setImage(request.image());
-		layer.setSpeed(request.speed());
-		layer.setDisplayOrder(request.displayOrder());
-		layer.setGameSection(section);
-		layer.setCreatedBy(user);
+        boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
+        if (displayOrderExists) {
+            throw new DuplicateDisplayOrderException("Camada com essa ordem já existe.");
+        }
 
-		parallaxLayerRepository.save(layer);
-	}
+        // Criação da pasta se não existir
+        try {
+            Files.createDirectories(Paths.get(uploadDir));
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao criar diretório de upload", e);
+        }
 
-	public void update(Long id, GameSectionParallaxLayerRequest request) {
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		User user = userRepository.findUserByUsername(username)
-				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
+        // Salvar o arquivo
+        String fileName = System.currentTimeMillis() + "_" + request.image().getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        try {
+            Files.copy(request.image().getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao salvar imagem", e);
+        }
 
+        // Salvar entidade
+        GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
+        layer.setImage(fileName); // só o nome da imagem, não o path completo
+        layer.setSpeed(request.speed());
+        layer.setDisplayOrder(request.displayOrder());
+        layer.setGameSection(section);
+        layer.setCreatedBy(user);
 
-		GameSection section = gameSectionRepository.findById(request.sectionId())
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", request.sectionId())));
-		
-		boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
-		if (displayOrderExists) {	
-			throw new DuplicateDisplayOrderException(
-	        		"Já existe uma camada com displayOrder=" + request.displayOrder());
-		}
-		GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
-		layer.setImage(request.image());
-		layer.setSpeed(request.speed());
-		layer.setDisplayOrder(request.displayOrder());
-		layer.setCreatedBy(user);
+        parallaxLayerRepository.save(layer);
+    }
 
-		parallaxLayerRepository.save(layer);
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+// --------- CONCERTAR ERRO ---------
+	
+	
+//	public void update(Long id, GameSectionParallaxLayerRequest request) {
+//		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//		User user = userRepository.findUserByUsername(username)
+//				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
+//
+//
+//		GameSection section = gameSectionRepository.findById(request.sectionId())
+//				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", request.sectionId())));
+//		
+//		boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
+//		if (displayOrderExists) {	
+//			throw new DuplicateDisplayOrderException(
+//	        		"Já existe uma camada com displayOrder=" + request.displayOrder());
+//		}
+//		GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
+//		layer.setImage(request.image());
+//		layer.setSpeed(request.speed());
+//		layer.setDisplayOrder(request.displayOrder());
+//		layer.setCreatedBy(user);
+//
+//		parallaxLayerRepository.save(layer);
+//	}
 
 
 	

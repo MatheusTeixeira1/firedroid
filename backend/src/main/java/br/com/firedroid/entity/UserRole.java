@@ -2,7 +2,10 @@ package br.com.firedroid.entity;
 
 public enum UserRole {
 	ADMIN("admin"),
-	USER("user");
+	USER("user"),//remova posteriormente
+	CONTENT_EDITOR("content_editor"),
+	GAME_EDITOR("game_editor"),
+	SUPPORT("support");
 	
 	private String role;
 	

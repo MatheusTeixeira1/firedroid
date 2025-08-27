@@ -27,9 +27,9 @@ public class FeaturedGamesController {
 	private FeaturedGamesService service;
 
 	// ----- Para usuarios -----
-	@GetMapping("/ ")
+	@GetMapping("/")
 	public ResponseEntity<List<GamePublicResponse>> getLastAdded() {
-
+		System.out.println("------------------------");
 		List<GamePublicResponse> games = service.getLastAdded();
         return ResponseEntity.ok(games); // 200 OK com lista no corpo
 		

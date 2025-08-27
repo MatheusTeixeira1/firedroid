@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firedorid</title>
+    <style>
+        :root {
+            --header-height: 8vh;
+            --game-main-image: url('../assets/background.png');
+            --game-primary-color: rgba(12, 54, 54);
+            --game-primary-color-90: rgba(12, 54, 54, 0.9);
+            --game-primary-color-40: rgba(12, 54, 54, 0.4);
+            --game-text-color: #f6f1ee;
+            --game-title-color: #b7e2a9;
+
+            --fire-droid-orange: #ed7d31;
+            --fire-droid-black: #1c1b1b;
+            --fire-droid-brown: #4f4a45;
+            --fire-droid-white: #f6f1ee;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: "Figtree", sans-serif;
+        }
+
+        body {
+            width: 100%;
+        }
+
+        header {
+            background-color: var(--fire-droid-black);
+            color: var(--fire-droid-white);
+            width: 100%;
+            height: var(--header-height);
+            min-height: 48px;
+            font-size: max(20px, calc(var(--header-height) * 0.3));
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid var(--fire-droid-orange);
+            border-right: 4px solid var(--fire-droid-orange);
+            border-bottom: 2px solid var(--fire-droid-orange);
+            /* padding: min(12px, 3%) min(16px, 2%); */
+            padding: 0 max(16px, 3%);
+        }
+
+        @media (max-width: 700px) {
+
+            header .header-right-side ul {
+                display: none;
+            }
+        }
+
+        .header-right-side {
+            display: flex;
+            height: 60%;
+            /* padding: min(12px, 3%); */
+            align-items: center;
+        }
+
+        .header-right-side ul {
+            list-style: none;
+            height: 100%;
+            display: flex;
+        }
+
+        .header-right-side ul li {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 0 min(42px, 4vw);
+            position: relative;
+        }
+
+        .header-right-side ul li:not(:last-child) {
+            border-right: 2px solid var(--fire-droid-white);
+        }
+
+        .header-right-side .hamburger-svg {
+            height: 100%;
+        }
+
+        .header-right-side .hamburger-svg path {
+            fill: var(--fire-droid-orange);
+        }
+
+        .header-left-side {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left-side img {
+            height: 90%;
+        }
+
+
+
+
+
+        main {
+            background-color: var(--fire-droid-black);
+            width: 100%;
+            padding: 0 min(64px, 4%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 4px solid var(--fire-droid-orange);
+            border-right: 4px solid var(--fire-droid-orange);
+        }
+
+        .game-main-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1500px;
+            height: calc(100vh - var(--header-height));
+            background-image: var(--game-main-image);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+        }
+
+        .game-main-semi-circle-top {
+            width: 100%;
+            --semi-circle-height: min(6vh, 100px);
+            height: var(--semi-circle-height);
+            background-color: var(--fire-droid-black);
+            -webkit-mask: radial-gradient(ellipse 60% var(--semi-circle-height) at 50% 0, transparent 98%, #000 99%);
+            mask: radial-gradient(ellipse 51% var(--semi-circle-height) at 50% 100%, transparent 98%, #000 99%);
+        }
+
+        .game-main-info-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            /* border-bottom: 1px solid var(--game-primary-color-90); */
+            --semi-circle-height: min(6vh, 100px);
+            padding-top: calc(var(--semi-circle-height) + 16px);
+            /* background-color: var(--game-primary-color-90); */
+            background: linear-gradient(to bottom, var(--game-primary-color-40) 0%, var(--game-primary-color) 70%);
+            /* background-color: var(--game-primary-color); */
+            -webkit-mask: radial-gradient(ellipse 60% var(--semi-circle-height) at 50% 0, transparent 98%, #000 99%);
+            mask: radial-gradient(ellipse 51% var(--semi-circle-height) at 50% 0%, transparent 98%, #000 99%);
+
+        }
+
+        .game-main-info {
+            width: 100%;
+            display: flex;
+            margin-bottom: 32px;
+            justify-content: space-between;
+            padding: 0 min(16px, 4%);
+
+        }
+
+        @media (max-width: 700px) {
+
+            .game-main-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-main-info .game-main-info-texts {
+                text-align: center;
+                width: min(400px, 80%);
+            }
+        }
+
+        .game-main-info-texts {
+            width: max(300px, 60%);
+            text-align: left;
+        }
+
+        .game-main-info-texts h1 {
+            color: var(--game-title-color);
+            padding: 8px 0;
+        }
+
+        .game-main-info-texts p {
+            color: var(--game-text-color);
+            padding: 0 0 16px;
+        }
+
+        .game-main-distributors {
+            display: flex;
+            gap: 12px;
+        }
+
+        .game-main-distributors img {
+            width: 64px;
+        }
+
+        .game-selector-btn {
+            border: none;
+            background-color: #0000;
+            border: 2px solid var(--fire-droid-white);
+            border-radius: 4px;
+            width: 32px;
+            height: 16px;
+        }
+
+        .game-selector-btn-active {
+            background-color: var(--fire-droid-white);
+        }
+
+        @media (max-width: 900px) {
+            main {
+                padding: 0;
+            }
+        }
+
+        .sections-container {
+            width: 100%;
+            background-color: var(--game-primary-color);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            padding-top: 32px;
+        }
+
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: min(900px, 90%);
+        }
+
+        .game-section h2 {
+            color: var(--game-title-color);
+        }
+
+        .game-section p {
+            color: var(--game-text-color);
+            margin-top: 8px;
+            padding: 0 16px;
+        }
+
+        .parallax-conatiner {
+            margin-top: 16px;
+            width: 100%;
+            aspect-ratio: 5/3;
+            border-radius: 16px;
+            border: 4px solid var(--fire-droid-white);
+            background-color: purple;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-left-side">
+            <img src="../assets/fire-droid_logo_droid_only_default.svg" alt="Logo da Firedroid">
+            <img src="" alt="">
+        </div>
+
+        <div class="header-right-side">
+            <ul>
+                <li>HOME</li>
+                <li>TEAM</li>
+                <li>GAMES</li>
+            </ul>
+            <svg class="hamburger-svg" viewBox="0 -2 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+                fill="#000000">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                    <title>hamburger 2</title>
+                    <desc>Created with Sketch Beta.</desc>
+                    <defs> </defs>
+                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+                        <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
+                            transform="translate(-310.000000, -1039.000000)" fill="#ed7d31">
+                            <path
+                                d="M338,1049 L314,1049 C311.791,1049 310,1050.79 310,1053 C310,1055.21 311.791,1057 314,1057 L338,1057 C340.209,1057 342,1055.21 342,1053 C342,1050.79 340.209,1049 338,1049 L338,1049 Z M338,1059 L314,1059 C311.791,1059 310,1060.79 310,1063 C310,1065.21 311.791,1067 314,1067 L338,1067 C340.209,1067 342,1065.21 342,1063 C342,1060.79 340.209,1059 338,1059 L338,1059 Z M314,1047 L338,1047 C340.209,1047 342,1045.21 342,1043 C342,1040.79 340.209,1039 338,1039 L314,1039 C311.791,1039 310,1040.79 310,1043 C310,1045.21 311.791,1047 314,1047 L314,1047 Z"
+                                id="hamburger-2" sketch:type="MSShapeGroup"> </path>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </div>
+    </header>
+
+    <main>
+        <div class="game-main-container">
+            <div class="game-main-semi-circle-top">
+
+            </div>
+
+
+
+            <div class="game-main-info-container">
+                <div id="game-main-selectors" class="game-main-selectors">
+
+                </div>
+                <div class="game-main-info">
+                    <div class="game-main-info-texts">
+                        <h1 id="main-title">Ratinho Gortdo</h1>
+                        <p id="main-description">Um ratinho gordinho que quer comer muito queijo. Cuidado com os gatos
+                            que protegem a
+                            geladeira, eles são perigosos. Os humanos não gostam de ratinhos gordinhos.</p>
+                    </div>
+                    <div class="game-main-distributors">
+                        <a id="epic-link" target="_blank" href="">
+                            <img src="../assets/epic-games.svg" alt="">
+                        </a>
+                        <a id="steam-link" target="_blank" href="">
+                            <img src="../assets/steam.svg" alt="">
+                        </a>
+                        <a id="itch-link" target="_blank" href="">
+                            <img src="../assets/itch-io.svg" alt="">
+                        </a>
+                    </div>
+                </div>
+                <hr style="width: calc(100% - min(32px, 8%));  background-color: white; padding: 0 ;" />
+            </div>
+
+        </div>
+        <div class="sections-container">
+            <div class="game-section">
+                <h2>Titulo Teste</h2>
+                <p>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid odit autem omnis reiciendis tempore
+                    ab labore. Id minima fuga reprehenderit aspernatur consequatur praesentium aliquam molestias
+                    laboriosam totam, minus odit veritatis.
+                </p>
+                <div class="parallax-conatiner">
+
+                </div>
+            </div>
+            <div class="game-section">
+                <h2>Titulo Teste</h2>
+                <p>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid odit autem omnis reiciendis tempore
+                    ab labore. Id minima fuga reprehenderit aspernatur consequatur praesentium aliquam molestias
+                    laboriosam totam, minus odit veritatis.
+                </p>
+                <div class="parallax-conatiner">
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+
+    </footer>
+    <script>
+        let featuredGames = [];
+        let currentGame;
+
+        const root = document.documentElement;
+
+        const computedStyle = getComputedStyle(root);
+
+        let primaryColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--game-primary-color')
+            .trim();
+
+        let mainTitle = document.getElementById("main-title");
+        let mainDescription = document.getElementById("main-description");
+        let selectors = document.getElementById("game-main-selectors")
+        let steamLink = document.getElementById("steam-link");
+        let epicLink = document.getElementById("epic-link");
+        let itchLink = document.getElementById("itch-link");
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("http://localhost:8080/api/featured-games/");
+                if (!response.ok) throw new Error("Erro ao buscar os dados do jogo.");
+
+                featuredGames = await response.json();
+                currentGame = featuredGames[0];
+
+                featuredGames.forEach((game, index) => {
+                    const button = document.createElement("button");
+                    button.classList.add("game-selector-btn");
+
+                    button.addEventListener("click", () => {
+                        // remove a classe de todos
+                        document.querySelectorAll(".game-selector-btn")
+                            .forEach(btn => btn.classList.remove("game-selector-btn-active"));
+
+                        // adiciona só no clicado
+                        button.classList.add("game-selector-btn-active");
+
+                        // renderiza o jogo
+                        currentGame = featuredGames[index];
+                        primaryColor = currentGame.pageTheme.backgroundColor;
+                        // document.documentElement.style.setProperty('--game-primary-color', primaryColor);
+
+                        gameTitleColor = currentGame.pageTheme.titleColor;
+                        setRootProperty('--game-title-color', gameTitleColor)
+                        mainTitle.textContent = currentGame.name;
+                        mainDescription.textContent = currentGame.description;
+                        epicLink.href = currentGame.epicLink;
+                        steamLink.href = currentGame.steamLink;
+                        itchLink.href = currentGame.itchioLink;
+                        console.log(index + ": " + currentGame.name);
+                    });
+                    if (index === 0) {
+                        button.classList.add("game-selector-btn-active");
+                        button.click();
+                    }
+                    selectors.appendChild(button);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar dados do jogo:", error);
+            }
+        });
+
+        function setRootProperty(name, value) {
+            document.documentElement.style.setProperty(name, value);
+
+        }
+
+
+
+        // Função para carregar a fonte
+        function loadGoogleFont() {
+            // Criar elementos link
+            const preconnect1 = document.createElement('link');
+            preconnect1.rel = 'preconnect';
+            preconnect1.href = 'https://fonts.googleapis.com';
+
+            const preconnect2 = document.createElement('link');
+            preconnect2.rel = 'preconnect';
+            preconnect2.href = 'https://fonts.gstatic.com';
+            preconnect2.crossOrigin = 'crossorigin';
+
+            const fontLink = document.createElement('link');
+            fontLink.rel = 'stylesheet';
+            fontLink.href = 'https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Figtree:ital,wght@0,300..900;1,300..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap';
+
+            // Adicionar ao head
+            document.head.appendChild(preconnect1);
+            document.head.appendChild(preconnect2);
+            document.head.appendChild(fontLink);
+        }
+
+        // Chamar a função
+        loadGoogleFont();
+    </script>
+</body>
+
+</html>

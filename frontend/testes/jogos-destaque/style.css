@@ -1,0 +1,95 @@
+:root{
+    --header-height: 64px;
+    --main-image: url('./assets/Ilustracao_Sem_Titulo-1.png');
+}
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+body{
+    width: 100%;
+    border-right: 8px solid #ed7d31;
+    border-left: 8px solid #ed7d31;
+    background-color: #1c1b1b;
+    padding: var(--header-height) 32px 0 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+header{
+    width: 100%;
+    height: var(--header-height);
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: #1c1b1b;
+    border-bottom: 2px solid #ed7d31;
+    border-right: 8px solid #ed7d31;
+    border-left: 8px solid #ed7d31;
+}
+.carousel-btn{
+    width: 24px;
+    height: 12px;
+    border: 2px solid white;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0);
+}
+.main-details-container{
+    width: 100%;
+    height: calc(100vh - var(--header-height));
+    background-image: var(--main-image);
+    padding-bottom: 32px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+.main-description-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    background-color: #0c3636;
+    padding: 48px 16px 32px 16px;
+    overflow: hidden;
+}
+
+.main-description-container::before {
+    content: "";
+    position: absolute;
+    top: -50px;   /* ajusta para cima */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;    /* largura da meia lua */
+    height: 90px;   /* altura da meia lua */
+    background: #1c1b1b; /* cor de fundo de fora */
+    border-radius: 50%;
+}
+
+.main-description-container::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 16px; /* mesmo valor do padding-left */
+    width: calc(100% - 32px); /* 100% - (padding left + right) */
+    height: 2px;
+    background-color: white;
+}
+
+.main-description-container>div{
+    width: 100%;
+}
+.main-carousel-btn-container{
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+.main-links-container{
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+.main-links-container>img{
+    width: 48px;
+    aspect-ratio: 1/1;
+}

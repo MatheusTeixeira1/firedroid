@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        :root {
+            --header-height: 64px;
+            --main-image: url('./assets/Ilustracao_Sem_Titulo-1.png');
+            --primary-color: #0c3636;
+            --text-color: #f6f1ee;
+            --title-color: #b7e2a9;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: "Roboto", sans-serif;
+        }
+
+        body {
+            width: 100%;
+            border-right: 8px solid #ed7d31;
+            border-left: 8px solid #ed7d31;
+            background-color: #1c1b1b;
+            padding: var(--header-height) 32px 0 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            height: var(--header-height);
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: #1c1b1b;
+            border-bottom: 2px solid #ed7d31;
+            border-right: 8px solid #ed7d31;
+            border-left: 8px solid #ed7d31;
+        }
+
+        .carousel-btn {
+            width: 24px;
+            height: 12px;
+            border: 2px solid white;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        .main-details-container {
+            width: 100%;
+            height: calc(100vh - var(--header-height));
+            background-image: var(--main-image);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* padding-bottom: 32px; */
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .main-details-container p {
+            color: var(--text-color);
+        }
+
+        .main-details-container h1 {
+            color: var(--title-color)
+        }
+
+        .main-description-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            background: linear-gradient(to bottom, transparent 0%, var(--primary-color) 70%);
+            padding: 48px 16px 32px 16px;
+            -webkit-mask: radial-gradient(ellipse 60% 80px at 50% 0, transparent 98%, #000 98.1%);
+            mask: radial-gradient(ellipse 50% 40px at 50% 0, transparent 98%, #000 98.1%);
+        }
+
+        .main-description-container::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            width: calc(100% - 32px);
+            height: 2px;
+            background-color: white;
+        }
+
+        .main-description-container>div {
+            width: 100%;
+        }
+
+        #main-carousel-btn-container {
+            width: auto;
+
+        }
+
+        .main-carousel-btn-container {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .main-links-container {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .main-links-container>img {
+            width: 48px;
+            aspect-ratio: 1/1;
+        }
+    </style>
+</head>
+
+<body>
+    <header></header>
+    <div class="main-details-container">
+        <div class="main-description-container">
+            <div class="main-description">
+                <h1>Ratinho Gordo</h1>
+                <p>Um ratinho gordinho que quer comer muito queijo. Cuidado com os gatos que protegem a geladeira, eles
+                    são perigosos. Os humanos não gostam de ratinhos gordinhos.</p>
+            </div>
+            <div class="main-carousel-btn-container" id="main-carousel-btn-container">
+                <button class="carousel-btn"></button>
+                <button class="carousel-btn"></button>
+                <button class="carousel-btn"></button>
+            </div>
+            <div class="main-links-container" id="main-links-container">
+                <img src="./assets/steam.svg" alt="">
+                <img src="./assets/itch-io.svg" alt="">
+                <img src="./assets/epic-games.svg" alt="">
+            </div>
+        </div>
+    </div>
+    <script>
+        const fontLink = document.createElement('link');
+        fontLink.rel = 'preconnect';
+        fontLink.href = 'https://fonts.googleapis.com';
+        document.head.appendChild(fontLink);
+
+        function verificarLarguraTela() {
+            const elemento = document.getElementById('main-carousel-btn-container1');
+            const elemento2 = document.getElementById('main-links-container1');
+
+            if (elemento && window.innerWidth < 750) {
+                elemento.style.display = 'none';
+                elemento2.style.width = 'auto';
+            } else if (elemento) {
+                elemento.style.display = '';
+                elemento2.style.width = '100%';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', verificarLarguraTela);
+
+        window.addEventListener('resize', verificarLarguraTela);
+    </script>
+</body>
+
+</html>
