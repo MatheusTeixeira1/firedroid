@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Camada Parallax</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Criar Nova Camada Parallax</h1>
+
+  <a id="backLink" href="index.html">⬅ Voltar para Seções</a>
+
+  <form id="parallaxForm">
+    <label>Imagem*:
+      <input type="file" name="image" accept="image/*" required>
+    </label>
+
+    <label>Velocidade*:
+      <input type="number" step="0.1" name="speed" required>
+    </label>
+
+    <label>Ordem de exibição*:
+      <input type="number" name="displayOrder" required>
+    </label>
+
+    <button type="submit">Criar Camada</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('parallaxForm');
+    const responseDiv = document.getElementById('response');
+    const backLink = document.getElementById("backLink");
+
+    // Pega o sectionId da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+    const sectionId = urlParams.get("sectionId");
+
+    if (sectionId) {
+      backLink.href = `read.html?gameId=${gameId}&sectionId=${sectionId}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.append("sectionId", sectionId);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:8080/api/game/section/parallax-layer', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          responseDiv.style.color = "green";
+          responseDiv.textContent = "Camada criada com sucesso!";
+          form.reset();
+        } else {
+          responseDiv.style.color = "red";
+          responseDiv.textContent = "Erro: " + (result.message || res.status);
+        }
+      } catch (err) {
+        responseDiv.style.color = "red";
+        responseDiv.textContent = 'Erro ao criar camada: ' + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

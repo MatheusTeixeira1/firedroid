@@ -7,4 +7,5 @@ import br.com.firedroid.entity.GameSection;
 
 public interface GameSectionRepository extends JpaRepository<GameSection, Long> {
 	boolean existsByGameAndDisplayOrder(Game game, int displayOrder);
+	boolean existsByGameAndDisplayOrderAndIdNot(Game game, Integer displayOrder, Long id);
 }

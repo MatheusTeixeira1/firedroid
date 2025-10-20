@@ -86,6 +86,7 @@ public class FeaturedGamesService {
     }
 
     public void create(FeaturedGamesRequest request) {
+    	
         validateNoDuplicateGames(request);
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -1,0 +1,77 @@
+<!-- create-layer.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Camada</title>
+</head>
+<body>
+  <h2>Criar Nova Camada Parallax</h2>
+
+  <form id="createForm">
+    <label>Imagem:</label>
+    <input type="file" name="image" required><br><br>
+
+    <label>Velocidade:</label>
+    <input type="number" name="speed" required><br><br>
+
+    <label>Ordem de Exibição:</label>
+    <input type="number" name="displayOrder" required><br><br>
+
+    <label>ID da Seção:</label>
+    <input type="number" name="sectionId" required><br><br>
+
+    <button type="submit">Criar</button>
+  </form>
+
+  <p id="msg"></p>
+
+  <script>
+    const form = document.getElementById('createForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Você precisa estar logado.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('http://localhost:8080/api/game/section/parallax-layer', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          },
+          body: formData
+        });
+
+        const msg = document.getElementById('msg');
+        if (response.ok) {
+          msg.style.color = 'green';
+          msg.innerText = 'Camada criada com sucesso!';
+        } else {
+          const errorData = await response.json();
+          msg.style.color = 'red';
+          
+          if (errorData.errors && Array.isArray(errorData.errors)) {
+            // Se houver array de erros específicos
+            msg.innerText = 'Erros de validação:\n' + errorData.errors.join('\n');
+          } else {
+            // Se houver apenas a mensagem geral
+            msg.innerText = errorData.message || 'Erro ao criar camada';
+          }
+        }
+      } catch (error) {
+        const msg = document.getElementById('msg');
+        msg.style.color = 'red';
+        msg.innerText = 'Erro na comunicação com o servidor';
+        console.error('Erro:', error);
+      }
+    });
+  </script>
+</body>
+</html>

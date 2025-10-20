@@ -244,6 +244,7 @@
 
         .sections-container {
             background-color: var(--game-primary-color);
+            width: 100%;
             padding-top: 16px;
             display: flex;
             flex-direction: column;
@@ -343,8 +344,8 @@
                 </div>
                 <div class="game-main-info">
                     <div class="game-main-info-texts">
-                        <h1>Ratinho Gortdo</h1>
-                        <p>Um ratinho gordinho que quer comer muito queijo. Cuidado com os gatos que protegem a
+                        <h1 id="main-title">Ratinho Gortdo</h1>
+                        <p id="main-description">Um ratinho gordinho que quer comer muito queijo. Cuidado com os gatos que protegem a
                             geladeira, eles são perigosos. Os humanos não gostam de ratinhos gordinhos.</p>
                     </div>
                     <div class="game-main-distributors">
@@ -378,6 +379,13 @@
 
             const data = featuredGames[index];
             const sectionsContainer = document.getElementById("sections-container");
+            const mainTitle = document.getElementById("main-title");
+            mainTitle.textContent = data.name;
+            const mainDescription = document.getElementById("main-description");
+            mainDescription.textContent = data.description;
+            //pega a vaiavel CSS "game-main-image"
+            const rootStyles = getComputedStyle(document.documentElement);
+            document.documentElement.style.setProperty('game-main-image', `url(http://localhost:8080/${data.gameBanner})`);
             sectionsContainer.innerHTML = "";
 
             data.sections.forEach(section => {
@@ -396,7 +404,7 @@
                 section.parallaxLayers.forEach(layer => {
                     const img = document.createElement("img");
                     const isFullUrl = layer.image.startsWith("http");
-                    img.src = isFullUrl ? layer.image : `http://localhost:8080/images/${layer.image}`;
+                    img.src = isFullUrl ? layer.image : `http://localhost:8080/${layer.image}`;
                     img.alt = `Camada ${layer.id}`;
                     img.dataset.speed = layer.speed;
                     parallaxDiv.appendChild(img);

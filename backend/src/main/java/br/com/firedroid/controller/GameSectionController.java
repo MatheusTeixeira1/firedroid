@@ -39,6 +39,12 @@ public class GameSectionController {
 		GameSectionPublicResponse game = gameSectionService.getById(id);
 		return ResponseEntity.ok(game);
 	}
+	
+    @GetMapping("/bygameid/{gameId}")
+    public ResponseEntity<List<GameSectionAdminResponse>> getSectionsByGameId(@PathVariable Long gameId) {
+        List<GameSectionAdminResponse> sections = gameSectionService.findByGameId(gameId);
+        return ResponseEntity.ok(sections);
+    }
 	// ----- ----- ----- -----
 
 	// ----- Para Funcionarios -----

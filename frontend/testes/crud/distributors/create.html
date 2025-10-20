@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Distribuidor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Criar Novo Distribuidor</h1>
+
+  <a id="backLink" href="../game/read.html">⬅ Voltar para Games</a>
+
+  <form id="distributorForm">
+    <label>Nome*:
+      <input type="text" name="name" maxlength="100" required>
+    </label>
+
+    <label>Link (URL do distribuidor)*:
+      <input type="url" name="link" required>
+    </label>
+
+    <label>Imagem (logo/banner)*:
+      <input type="file" name="image" accept="image/*" required>
+    </label>
+
+    <label>Ordem de exibição*:
+      <input type="number" name="displayOrder" required>
+    </label>
+
+    <button type="submit">Criar Distribuidor</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('distributorForm');
+    const responseDiv = document.getElementById('response');
+    const backLink = document.getElementById("backLink");
+
+    // Pega o gameId da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+
+    if (gameId) {
+      backLink.href = `read.html?gameId=${gameId}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.append("gameId", gameId);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:8080/api/game/distributors', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          responseDiv.textContent = "Distribuidor criado com sucesso!";
+          form.reset();
+        } else {
+          responseDiv.textContent = "Erro: " + (result.message || res.status);
+        }
+      } catch (err) {
+        responseDiv.textContent = 'Erro ao criar distribuidor: ' + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

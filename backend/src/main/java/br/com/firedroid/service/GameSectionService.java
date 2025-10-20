@@ -65,7 +65,14 @@ public class GameSectionService {
 
 		return GameSectionAdminResponse.fromEntity(section);
 	}
+    public List<GameSectionAdminResponse> findByGameId(Long gameId) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomEntityNotFoundException("Jogo não encontrado"));
 
+        return game.getSections().stream()
+                .map(GameSectionAdminResponse::fromEntity)
+                .toList();
+    }
 	public void create(GameSectionRequest request) {
 	    String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userRepository.findUserByUsername(username)
@@ -92,31 +99,36 @@ public class GameSectionService {
 	    gameSectionRepository.save(section);
 	}
 	
+	
 	public void update(Long id, GameSectionRequest request) {
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		User user = userRepository.findUserByUsername(username)
-				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
-		
-		
-		GameSection section = gameSectionRepository.findById(id)
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", id)));
-		
-		Game game = gameRepository.findById(id)
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Jogo de id %s não encontrado", id)));
-		
-		boolean displayOrderExists = gameSectionRepository.existsByGameAndDisplayOrder(game, request.displayOrder());
-		if (displayOrderExists) {
-			throw new DuplicateDisplayOrderException(
-	        		"Já existe uma entidade com displayOrder=" + request.displayOrder());
-	    }
-		
-		section.setTitle(request.title());
-		section.setText(request.text());
-		section.setDisplayOrder(request.displayOrder());
-		section.setUpdatedBy(user);
+	    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+	    User user = userRepository.findUserByUsername(username)
+	            .orElseThrow(() -> new InvalidUsernameException("Usuario %s invalido.".formatted(username)));
 
-		gameSectionRepository.save(section);
+	    GameSection section = gameSectionRepository.findById(id)
+	            .orElseThrow(() -> new CustomEntityNotFoundException("Seção de id %s não encontrada".formatted(id)));
+
+	    Game targetGame = gameRepository.findById(request.gameId())
+	            .orElseThrow(() -> new CustomEntityNotFoundException("Jogo de id %s não encontrado".formatted(request.gameId())));
+
+	    // valida duplicidade ignorando a própria seção
+	    boolean duplicated = gameSectionRepository
+	            .existsByGameAndDisplayOrderAndIdNot(targetGame, request.displayOrder(), id);
+
+	    if (duplicated) {
+	        throw new DuplicateDisplayOrderException(
+	                "Já existe uma seção com displayOrder=" + request.displayOrder() + " para este jogo.");
+	    }
+
+	    section.setTitle(request.title());
+	    section.setText(request.text());
+	    section.setDisplayOrder(request.displayOrder());
+	    section.setGame(targetGame); // opcional: caso permita mover a seção de jogo
+	    section.setUpdatedBy(user);
+
+	    gameSectionRepository.save(section);
 	}
+
 
 	public void delete(Long id) {
 		GameSection section = gameSectionRepository.findById(id)

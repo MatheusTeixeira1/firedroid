@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Criar Game</h1>
+
+  <a href="read.html">⬅ Voltar para Games</a>
+  <form id="gameForm">
+    <label>Nome*:
+      <input type="text" name="name" maxlength="100" required>
+    </label>
+
+    <label>Descrição*:
+      <textarea name="description" rows="4" required></textarea>
+    </label>
+
+    <label>Banner do Game*:
+      <input type="file" name="gameBanner" accept="image/*" required>
+    </label>
+
+    <label>Ícone do Game*:
+      <input type="file" name="gameIcon" accept="image/*" required>
+    </label>
+
+    <label>Page Theme (opcional):
+      <select name="pageTheme" id="pageTheme">
+      </select>
+    </label>
+
+    <button type="submit">Criar Game</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('gameForm');
+    const responseDiv = document.getElementById('response');
+    const themeSelect = document.getElementById('pageTheme');
+
+    // Carregar opções de temas no select
+    async function loadThemes() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:8080/api/theme", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
+
+        const themes = await res.json();
+        themes.forEach(theme => {
+          const option = document.createElement("option");
+          option.value = theme.id;
+          option.textContent = theme.name;
+          themeSelect.appendChild(option);
+        });
+      } catch (err) {
+        responseDiv.textContent = "Erro ao carregar temas: " + err.message;
+      }
+    }
+
+    loadThemes();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      // Pega o token do localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:8080/api/game', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}` // token enviado
+          },
+          body: formData
+        });
+
+        const result = await res.json();
+        responseDiv.textContent = JSON.stringify(result.message, null, 2);
+      } catch (err) {
+        responseDiv.textContent = 'Erro ao criar game: ' + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

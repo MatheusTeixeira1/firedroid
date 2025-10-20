@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Temas do Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin: 2px;
+      cursor: pointer;
+    }
+
+    .color-box {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border: 1px solid #000;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    a {
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Temas do Game</h1>
+    <a href="create.html">Create</a>
+  </div>
+
+  <a href="../index.html">⬅ Voltar para Index</a>
+
+  <table id="themesTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Background</th>
+        <th>Ícone</th>
+        <th>Título</th>
+        <th>Parágrafo</th>
+        <th>Peso Título</th>
+        <th>Peso Parágrafo</th>
+        <th>Fonte Título</th>
+        <th>Fonte Parágrafo</th>
+        <th>Tamanho Título</th>
+        <th>Tamanho Parágrafo</th>
+        <th>Criado por</th>
+        <th>Atualizado por</th>
+        <th>Criado em</th>
+        <th>Atualizado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Temas carregados via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    const tableBody = document.querySelector("#themesTable tbody");
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      tableBody.innerHTML = '<tr><td colspan="17">Token não encontrado. Faça login primeiro.</td></tr>';
+    } else {
+      fetch("http://localhost:8080/api/theme/adm", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(async res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return Array.isArray(data) ? data : (data ? [data] : []);
+        })
+        .then(themes => {
+          tableBody.innerHTML = "";
+          if (!themes.length) {
+            tableBody.innerHTML = '<tr><td colspan="17">Nenhum tema encontrado</td></tr>';
+            return;
+          }
+
+          themes.forEach(theme => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+              <td>${theme.id}</td>
+              <td>${theme.name ?? "-"}</td>
+              <td><span class="color-box" style="background:${theme.backgroundColor}"></span>${theme.backgroundColor ?? "-"}</td>
+              <td><span class="color-box" style="background:${theme.iconColor}"></span>${theme.iconColor ?? "-"}</td>
+              <td><span class="color-box" style="background:${theme.titleColor}"></span>${theme.titleColor ?? "-"}</td>
+              <td><span class="color-box" style="background:${theme.paragraphColor}"></span>${theme.paragraphColor ?? "-"}</td>
+              <td>${theme.titleWeight ?? "-"}</td>
+              <td>${theme.paragraphWeight ?? "-"}</td>
+              <td>${theme.titleFont ?? "-"}</td>
+              <td>${theme.paragraphFont ?? "-"}</td>
+              <td>${theme.titleSize ?? "-"}</td>
+              <td>${theme.paragraphSize ?? "-"}</td>
+              <td>${theme.createdBy ?? "-"}</td>
+              <td>${theme.updatedBy ?? "-"}</td>
+              <td>${theme.createdAt ?? "-"}</td>
+              <td>${theme.updatedAt ?? "-"}</td>
+              <td>
+                <button onclick="updateTheme(${theme.id})">Editar</button>
+                <button onclick="deleteTheme(${theme.id}, this)">Deletar</button>
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          tableBody.innerHTML = `<tr><td colspan="17">Erro: ${err.message}</td></tr>`;
+        });
+    }
+
+    function updateTheme(id) {
+      window.location.href = `update.html?id=${id}`;
+    }
+
+    async function deleteTheme(id, btn) {
+      if (!confirm("Tem certeza que deseja deletar este tema?")) return;
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/theme/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          btn.closest('tr').remove();
+        } else {
+          const error = await res.json();
+          alert("Erro ao deletar: " + (error.message || res.status));
+        }
+      } catch (err) {
+        alert("Erro ao deletar: " + err.message);
+      }
+    }
+  </script>
+</body>
+
+</html>

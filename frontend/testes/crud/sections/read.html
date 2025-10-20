@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Seções do Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    a {
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin: 2px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Seções do Game</h1>
+    <a id="createLink" href="#">Criar Nova Seção</a>
+  </div>
+  <a href="../game/read.html">⬅ Voltar para Games</a>
+
+  <table id="sectionsTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Texto</th>
+        <th>Ordem</th>
+        <th>Camadas de Parallax</th>
+        <th>Criado por</th>
+        <th>Atualizado por</th>
+        <th>Criado em</th>
+        <th>Atualizado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Seções carregadas via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    const tableBody = document.querySelector("#sectionsTable tbody");
+    const createLink = document.getElementById("createLink");
+    const token = localStorage.getItem("token");
+
+    // Recupera gameId da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+
+    // Ajusta o link de criação para enviar o gameId
+    if (gameId) {
+      createLink.href = `create.html?gameId=${gameId}`;
+    } else {
+      createLink.style.display = "none"; // esconde botão se não houver gameId
+    }
+
+    if (!token) {
+      tableBody.innerHTML = '<tr><td colspan="10">Token não encontrado. Faça login primeiro.</td></tr>';
+    } else {
+      fetch(`http://localhost:8080/api/game/section/bygameid/${gameId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(async res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return Array.isArray(data) ? data : (data ? [data] : []);
+        })
+        .then(sections => {
+          tableBody.innerHTML = "";
+          if (!sections.length) {
+            tableBody.innerHTML = '<tr><td colspan="10">Nenhuma seção encontrada</td></tr>';
+            return;
+          }
+
+          sections.forEach(section => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+              <td>${section.id}</td>
+              <td>${section.title ?? "-"}</td>
+              <td>${section.text ?? "-"}</td>
+              <td>${section.displayOrder ?? "-"}</td>
+              <td>
+                <a href="../parallax/read.html?gameId=${gameId}&sectionId=${section.id}">
+                  Ver Camadas (${section.parallaxLayers?.length ?? 0})
+                </a>
+              </td>
+              <td>${section.createdBy ?? "-"}</td>
+              <td>${section.updatedBy ?? "-"}</td>
+              <td>${section.createdAt ?? "-"}</td>
+              <td>${section.updatedAt ?? "-"}</td>
+              <td>
+                <button onclick="updateSection(${section.id})">Editar</button>
+                <button onclick="deleteSection(${section.id}, this)">Deletar</button>
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          tableBody.innerHTML = `<tr><td colspan="10">Erro: ${err.message}</td></tr>`;
+        });
+    }
+
+    // Função para editar seção
+    function updateSection(id) {
+      window.location.href = `update.html?gameId=${gameId}&sectionId=${id}`;
+    }
+
+    // Função para deletar seção
+    async function deleteSection(id, btn) {
+      if (!confirm("Tem certeza que deseja deletar esta seção?")) return;
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/section/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          btn.closest("tr").remove();
+        } else {
+          const error = await res.json();
+          alert("Erro ao deletar: " + (error.message || res.status));
+        }
+      } catch (err) {
+        alert("Erro ao deletar: " + err.message);
+      }
+    }
+  </script>
+</body>
+
+</html>

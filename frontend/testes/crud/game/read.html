@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        .nested-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h1>Lista de Games</h1>
+        <a href="create.html">Create</a>
+    </div>
+
+    <a href="../index.html">⬅ Voltar para Index</a>
+    <table id="gamesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Banner</th>
+                <th>Ícone</th>
+                <th>PageTheme</th>
+                <th>Created By</th>
+                <th>Updated By</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>Sections</th>
+                <th>Distributors</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Games vão ser adicionados aqui -->
+        </tbody>
+    </table>
+
+    <script>
+        const tableBody = document.querySelector('#gamesTable tbody');
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            tableBody.innerHTML = '<tr><td colspan="13">Token não encontrado. Faça login primeiro.</td></tr>';
+        } else {
+            fetch('http://localhost:8080/api/game/adm', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(games => {
+                    tableBody.innerHTML = '';
+                    games.forEach(game => {
+                        const tr = document.createElement('tr');
+
+                        const pageTheme = game.pageTheme ? game.pageTheme.name : '-';
+
+                        tr.innerHTML = `
+                            <td>${game.id}</td>
+                            <td>${game.name}</td>
+                            <td>${game.description}</td>
+                            <td>${game.gameBanner ? `<img src="http://localhost:8080/${game.gameBanner}" alt="Banner" width="100">` : '-'}</td>
+                            <td>${game.gameIcon ? `<img src="http://localhost:8080/${game.gameIcon}" alt="Icon" width="50">` : '-'}</td>
+                            <td>${pageTheme}</td>
+                            <td>${game.createdBy}</td>
+                            <td>${game.updatedBy ?? '-'}</td>
+                            <td>${game.createdAt}</td>
+                            <td>${game.updatedAt ?? '-'}</td>
+                            <td><a href="../sections/read.html?gameId=${game.id}">Ver Seções</a></td>
+                            <td><a href="../distributors/read.html?gameId=${game.id}">Ver Distributors</a></td>
+                            <td>
+                                <button onclick="updateGame(${game.id})">Editar</button>
+                                <button onclick="deleteGame(${game.id}, this)">Deletar</button>
+                            </td>
+                        `;
+
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    tableBody.innerHTML = `<tr><td colspan="13">Erro ao buscar games: ${err.message}</td></tr>`;
+                });
+        }
+
+        // Redireciona para tela de edição
+        function updateGame(id) {
+            window.location.href = `update.html?id=${id}`;
+        }
+
+        // Deleta um game
+        async function deleteGame(id, btn) {
+            if (!confirm("Tem certeza que deseja deletar este game?")) return;
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/game/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    // Remove a linha da tabela
+                    btn.closest('tr').remove();
+                } else {
+                    const error = await res.json();
+                    alert("Erro ao deletar: " + (error.message || res.status));
+                }
+            } catch (err) {
+                alert("Erro ao deletar: " + err.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

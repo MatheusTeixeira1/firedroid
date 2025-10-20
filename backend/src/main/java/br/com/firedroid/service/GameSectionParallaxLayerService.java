@@ -1,14 +1,8 @@
 package br.com.firedroid.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerRequest;
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerAdminResponse;
 import br.com.firedroid.DTOs.game_section_parallax.GameSectionParallaxLayerPublicResponse;
-
 import br.com.firedroid.entity.GameSection;
 import br.com.firedroid.entity.GameSectionParallaxLayer;
 import br.com.firedroid.entity.User;
@@ -19,165 +13,168 @@ import br.com.firedroid.repository.GameSectionParallaxLayerRepository;
 import br.com.firedroid.repository.GameSectionRepository;
 import br.com.firedroid.repository.UserRepository;
 
-
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
-
+import java.io.IOException;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class GameSectionParallaxLayerService {
 
-	@Autowired
-	private GameSectionRepository gameSectionRepository;
+    private static final String UPLOAD_DIR_PARALLAX = "uploads/parallax/";
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private GameSectionRepository gameSectionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
-	
-	@Autowired
-	private GameSectionParallaxLayerRepository parallaxLayerRepository;
+    @Autowired
+    private GameSectionParallaxLayerRepository parallaxLayerRepository;
 
-	public GameSectionParallaxLayerService(GameSectionRepository gameSectionRepository, UserRepository userRepository, GameSectionParallaxLayerRepository gameSectionParallaxLayerRepository) {
-		this.gameSectionRepository = gameSectionRepository;
-		this.userRepository = userRepository;
-		this.parallaxLayerRepository = gameSectionParallaxLayerRepository;
-	}
+    // ----- Para usuários -----
+    public List<GameSectionParallaxLayerPublicResponse> getAll() {
+        return parallaxLayerRepository.findAll()
+                .stream()
+                .map(GameSectionParallaxLayerPublicResponse::fromEntity)
+                .toList();
+    }
 
-	// ----- Para usuarios -----
+    public GameSectionParallaxLayerPublicResponse getById(Long id) {
+        GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        String.format("Camada de id %s não encontrada", id)));
+        return GameSectionParallaxLayerPublicResponse.fromEntity(layer);
+    }
 
-	public List<GameSectionParallaxLayerPublicResponse> getAll() {
+    public List<GameSectionParallaxLayerAdminResponse> getBySectionId(Long sectionId) {
+        GameSection section = gameSectionRepository.findById(sectionId)
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        String.format("Seção de id %s não encontrada", sectionId)));
+        return section.getParallaxLayers()
+                .stream()
+                .map(GameSectionParallaxLayerAdminResponse::fromEntity)
+                .toList();
+    }
 
-		List<GameSectionParallaxLayer> layers = parallaxLayerRepository.findAll();
-		return layers.stream().map(GameSectionParallaxLayerPublicResponse::fromEntity).toList();
-	}
-	
-	public GameSectionParallaxLayerPublicResponse getById(Long id) {
+    // ----- Para funcionários -----
+    public List<GameSectionParallaxLayerAdminResponse> getAllAdmin() {
+        return parallaxLayerRepository.findAll()
+                .stream()
+                .map(GameSectionParallaxLayerAdminResponse::fromEntity)
+                .toList();
+    }
 
-		GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Camada de id %s não encontrada", id)));
-		
-		return GameSectionParallaxLayerPublicResponse.fromEntity(layer);
-	}
-	
-	// ----- ----- ----- -----
+    public GameSectionParallaxLayerAdminResponse getByIdAdmin(Long id) {
+        GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        String.format("Camada de id %s não encontrada", id)));
+        return GameSectionParallaxLayerAdminResponse.fromEntity(layer);
+    }
 
-	// ----- Para Funcionarios -----
-
-	public List<GameSectionParallaxLayerAdminResponse> getAllAdmin() {
-		List<GameSectionParallaxLayer> layers = parallaxLayerRepository.findAll();
-		return layers.stream().map(GameSectionParallaxLayerAdminResponse::fromEntity).toList();
-	}
-	
-	public GameSectionParallaxLayerAdminResponse getByIdAdmin(Long id) {
-		GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Camada de id %s não encontrada",id)));
-		return GameSectionParallaxLayerAdminResponse.fromEntity(layer);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-    private final String uploadDir = "uploads/parallax"; // caminho relativo
-
+    // ----- Criar camada -----
     public void create(GameSectionParallaxLayerRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new InvalidUsernameException("Usuário inválido: " + username));
+        User user = getAuthenticatedUser();
 
         GameSection section = gameSectionRepository.findById(request.sectionId())
-                .orElseThrow(() -> new CustomEntityNotFoundException("Seção não encontrada"));
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        "Seção de id %s não encontrada".formatted(request.sectionId())));
 
-        boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
-        if (displayOrderExists) {
-            throw new DuplicateDisplayOrderException("Camada com essa ordem já existe.");
+        // valida duplicidade
+        boolean duplicated = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
+        if (duplicated) {
+            throw new DuplicateDisplayOrderException("Já existe uma camada com displayOrder=" + request.displayOrder());
         }
 
-        // Criação da pasta se não existir
-        try {
-            Files.createDirectories(Paths.get(uploadDir));
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao criar diretório de upload", e);
-        }
-
-        // Salvar o arquivo
-        String fileName = System.currentTimeMillis() + "_" + request.image().getOriginalFilename();
-        Path filePath = Paths.get(uploadDir, fileName);
-        try {
-            Files.copy(request.image().getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar imagem", e);
-        }
-
-        // Salvar entidade
         GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
-        layer.setImage(fileName); // só o nome da imagem, não o path completo
         layer.setSpeed(request.speed());
         layer.setDisplayOrder(request.displayOrder());
         layer.setGameSection(section);
+
+        MultipartFile imageFile = request.image();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            layer.setImage(saveFile(imageFile, UPLOAD_DIR_PARALLAX));
+        }
+
+        // Auditoria
         layer.setCreatedBy(user);
+        layer.setCreatedAt(LocalDateTime.now());
 
         parallaxLayerRepository.save(layer);
     }
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-// --------- CONCERTAR ERRO ---------
-	
-	
-//	public void update(Long id, GameSectionParallaxLayerRequest request) {
-//		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//		User user = userRepository.findUserByUsername(username)
-//				.orElseThrow(() -> new InvalidUsernameException(String.format("Usuario %s invalido.", username)));
-//
-//
-//		GameSection section = gameSectionRepository.findById(request.sectionId())
-//				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Seção de id %s não encontrado", request.sectionId())));
-//		
-//		boolean displayOrderExists = parallaxLayerRepository.existsByGameSectionAndDisplayOrder(section, request.displayOrder());
-//		if (displayOrderExists) {	
-//			throw new DuplicateDisplayOrderException(
-//	        		"Já existe uma camada com displayOrder=" + request.displayOrder());
-//		}
-//		GameSectionParallaxLayer layer = new GameSectionParallaxLayer();
-//		layer.setImage(request.image());
-//		layer.setSpeed(request.speed());
-//		layer.setDisplayOrder(request.displayOrder());
-//		layer.setCreatedBy(user);
-//
-//		parallaxLayerRepository.save(layer);
-//	}
+    // ----- Atualizar camada -----
+    public void update(Long id, GameSectionParallaxLayerRequest request) {
+        User user = getAuthenticatedUser();
 
+        GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        "Camada de id %s não encontrada".formatted(id)));
 
-	
-	public void delete(Long id) {
-		GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
-				.orElseThrow(() -> new CustomEntityNotFoundException(String.format("Camada de id %s não encontrada", id)));
+        // Seção alvo (pode ou não mudar)
+        GameSection section = (request.sectionId() != null)
+                ? gameSectionRepository.findById(request.sectionId())
+                    .orElseThrow(() -> new CustomEntityNotFoundException(
+                            "Seção de id %s não encontrada".formatted(request.sectionId())))
+                : layer.getGameSection();
 
-		parallaxLayerRepository.delete(layer);
-	}
+        // valida duplicidade ignorando a própria camada
+        boolean duplicated = parallaxLayerRepository
+                .existsByGameSectionAndDisplayOrderAndIdNot(section, request.displayOrder(), id);
+
+        if (duplicated) {
+            throw new DuplicateDisplayOrderException(
+                    "Já existe uma camada com displayOrder=" + request.displayOrder() + " nessa seção.");
+        }
+
+        // Atualiza campos
+        layer.setSpeed(request.speed());
+        layer.setDisplayOrder(request.displayOrder());
+        layer.setGameSection(section);
+
+        MultipartFile imageFile = request.image();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            layer.setImage(saveFile(imageFile, UPLOAD_DIR_PARALLAX));
+        }
+
+        // Auditoria
+        layer.setUpdatedBy(user);
+        layer.setUpdatedAt(LocalDateTime.now());
+
+        parallaxLayerRepository.save(layer);
+    }
+
+    // ----- Deletar camada -----
+    public void delete(Long id) {
+        GameSectionParallaxLayer layer = parallaxLayerRepository.findById(id)
+                .orElseThrow(() -> new CustomEntityNotFoundException(
+                        String.format("Camada de id %s não encontrada", id)));
+        parallaxLayerRepository.delete(layer);
+    }
+
+    // ----- Utilitários -----
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new InvalidUsernameException(
+                        String.format("Usuário %s inválido", username)));
+    }
+
+    private String saveFile(MultipartFile file, String uploadDir) {
+        try {
+            Files.createDirectories(Paths.get(uploadDir));
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path path = Paths.get(uploadDir, filename);
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            return path.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao salvar arquivo: " + file.getOriginalFilename(), e);
+        }
+    }
 }

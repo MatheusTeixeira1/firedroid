@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Seção</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    form {
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .actions {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Editar Seção</h1>
+  <a id="backLink" href="#">⬅ Voltar para Seções</a>
+
+  <form id="editForm">
+    <label for="title">Título</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="text">Texto</label>
+    <textarea id="text" name="text" rows="4" required></textarea>
+
+    <label for="displayOrder">Ordem de Exibição</label>
+    <input type="number" id="displayOrder" name="displayOrder" required>
+
+    <button type="submit">Salvar Alterações</button>
+  </form>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    // Pega parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionId = urlParams.get("sectionId");
+    const gameId = urlParams.get("gameId");
+
+    const form = document.getElementById("editForm");
+    const backLink = document.getElementById("backLink");
+
+    // Ajusta link de voltar
+    backLink.href = `read.html?gameId=${gameId}`;
+
+    if (!token) {
+      alert("Token não encontrado. Faça login primeiro.");
+      window.location.href = "../login.html";
+    }
+
+    // Busca dados da seção
+    fetch(`http://localhost:8080/api/game/section/${sectionId}/adm`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(section => {
+        document.getElementById("title").value = section.title ?? "";
+        document.getElementById("text").value = section.text ?? "";
+        document.getElementById("displayOrder").value = section.displayOrder ?? "";
+      })
+      .catch(err => {
+        alert("Erro ao carregar seção: " + err.message);
+      });
+
+    // Submete edição
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const sectionData = {
+        title: document.getElementById("title").value,
+        text: document.getElementById("text").value,
+        displayOrder: parseInt(document.getElementById("displayOrder").value),
+        gameId: parseInt(gameId) // precisa estar no body para respeitar o DTO
+      };
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/section/${sectionId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(sectionData)
+        });
+
+        if (res.ok) {
+          alert("Seção atualizada com sucesso!");
+          window.location.href = `read.html?gameId=${gameId}`;
+        } else {
+          const error = await res.json();
+          alert("Erro ao atualizar seção: " + (error.message || res.status));
+        }
+      } catch (err) {
+        alert("Erro: " + err.message);
+      }
+    });
+  </script>
+</body>
+
+</html>

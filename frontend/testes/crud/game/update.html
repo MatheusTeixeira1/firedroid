@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Editar Game</h1>
+
+  <a href="read.html">⬅ Voltar para Games</a>
+  <form id="gameForm">
+    <label>Nome*:
+      <input type="text" name="name" maxlength="100" required>
+    </label>
+
+    <label>Descrição*:
+      <textarea name="description" rows="4" required></textarea>
+    </label>
+
+    <label>Banner do Game (opcional):
+      <input type="file" name="gameBanner" accept="image/*">
+    </label>
+
+    <label>Ícone do Game (opcional):
+      <input type="file" name="gameIcon" accept="image/*">
+    </label>
+
+    <label>Page Theme (opcional):
+      <select name="pageThemeId" id="pageTheme">
+      </select>
+    </label>
+
+    <button type="submit">Salvar Alterações</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('gameForm');
+    const responseDiv = document.getElementById('response');
+    const themeSelect = document.getElementById("pageTheme");
+
+    // Recupera ID do game pela URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("id");
+
+    if (!gameId) {
+      responseDiv.textContent = "ID do game não informado na URL.";
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+    }
+
+    // Carregar lista de temas
+    async function loadThemes(selectedId = null) {
+      try {
+        const res = await fetch("http://localhost:8080/api/theme/adm", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const themes = await res.json();
+
+        // Preenche o select
+        themes.forEach(theme => {
+          const option = document.createElement("option");
+          option.value = theme.id;
+          option.textContent = theme.name;
+          if (selectedId && theme.id === selectedId) {
+            option.selected = true;
+          }
+          themeSelect.appendChild(option);
+        });
+
+      } catch (err) {
+        responseDiv.textContent = "Erro ao carregar temas: " + err.message;
+      }
+    }
+
+    // Carregar dados do game para edição
+    async function loadGame() {
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/${gameId}/adm`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const game = await res.json();
+
+        // Preenche os campos
+        form.name.value = game.name ?? "";
+        form.description.value = game.description ?? "";
+
+        // Carrega temas e marca o do game
+        loadThemes(game.pageTheme?.id);
+
+      } catch (err) {
+        responseDiv.textContent = "Erro ao carregar game: " + err.message;
+      }
+    }
+
+    loadGame();
+
+    // Atualizar game
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/${gameId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await res.json();
+        responseDiv.textContent = JSON.stringify(result.message, null, 2);
+      } catch (err) {
+        responseDiv.textContent = 'Erro ao atualizar game: ' + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Distribuidor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    form {
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    img {
+      max-width: 150px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Editar Distribuidor</h1>
+  <a id="backLink" href="#">⬅ Voltar para Distribuidores</a>
+
+  <form id="editForm">
+    <label>Nome*:
+      <input type="text" name="name" id="name" required>
+    </label>
+
+    <label>Link*:
+      <input type="url" name="link" id="link" required>
+    </label>
+
+    <label>Ordem de exibição*:
+      <input type="number" name="displayOrder" id="displayOrder" required>
+    </label>
+
+    <label>Imagem atual:</label>
+    <img id="currentImage" alt="Imagem atual do distribuidor">
+
+    <label>Nova imagem (opcional):
+      <input type="file" name="image" id="image" accept="image/*">
+    </label>
+
+    <button type="submit">Salvar Alterações</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('editForm');
+    const responseDiv = document.getElementById('response');
+    const backLink = document.getElementById("backLink");
+
+    // Pega parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const distributorId = urlParams.get("distributorId");
+    const gameId = urlParams.get("gameId");
+
+    if (gameId) {
+      backLink.href = `read.html?gameId=${gameId}`;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token não encontrado. Faça login primeiro.");
+      window.location.href = "../login.html";
+    }
+
+    // Busca dados do distribuidor
+    fetch(`http://localhost:8080/api/game/distributors/${distributorId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(distributor => {
+        document.getElementById("name").value = distributor.name ?? "";
+        document.getElementById("link").value = distributor.link ?? "";
+        document.getElementById("displayOrder").value = distributor.displayOrder ?? "";
+        if (distributor.image) {
+          document.getElementById("currentImage").src = `http://localhost:8080/${distributor.image}`;
+        } else {
+          document.getElementById("currentImage").style.display = "none";
+        }
+      })
+      .catch(err => {
+        responseDiv.textContent = "Erro ao carregar distribuidor: " + err.message;
+      });
+
+    // Submete edição
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append("name", document.getElementById("name").value);
+      formData.append("link", document.getElementById("link").value);
+      formData.append("displayOrder", document.getElementById("displayOrder").value);
+      formData.append("gameId", gameId);
+
+      const newImage = document.getElementById("image").files[0];
+      if (newImage) {
+        formData.append("image", newImage);
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/distributors/${distributorId}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert("Distribuidor atualizado com sucesso!");
+          window.location.href = `read.html?gameId=${gameId}`;
+        } else {
+          responseDiv.textContent = "Erro: " + (result.message || res.status);
+        }
+      } catch (err) {
+        responseDiv.textContent = "Erro: " + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

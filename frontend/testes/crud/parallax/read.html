@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Camadas de Parallax</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    img {
+      max-height: 50px;
+    }
+
+    a {
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    button {
+      margin: 2px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Camadas de Parallax</h1>
+    <a id="createLink" href="create.html">Criar Nova Camada</a>
+  </div>
+
+  <a id="backLink">⬅ Voltar para Seções</a>
+
+  <table id="parallaxTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Imagem</th>
+        <th>Velocidade</th>
+        <th>Ordem</th>
+        <th>Criado por</th>
+        <th>Atualizado por</th>
+        <th>Criado em</th>
+        <th>Atualizado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Camadas carregadas via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    const tableBody = document.querySelector("#parallaxTable tbody");
+    const token = localStorage.getItem("token");
+
+    // Pegar sectionId da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionId = urlParams.get("sectionId");
+    const gameId = urlParams.get("gameId");
+
+    const backLink = document.getElementById("backLink");
+    const createLink = document.getElementById("createLink");
+    createLink.href = `create.html?gameId=${gameId}&sectionId=${sectionId}`;
+    
+    backLink.href = `../sections/read.html?gameId=${gameId}`;
+
+    if (!token) {
+      tableBody.innerHTML = '<tr><td colspan="9">Token não encontrado. Faça login primeiro.</td></tr>';
+    } else if (!sectionId) {
+      tableBody.innerHTML = '<tr><td colspan="9">ID da seção não fornecido.</td></tr>';
+    } else {
+
+
+      // 🔹 Buscar layers normalmente
+      fetch(`http://localhost:8080/api/game/section/parallax-layer/getbysectionid/${sectionId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(async res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return Array.isArray(data) ? data : (data ? [data] : []);
+        })
+        .then(layers => {
+          tableBody.innerHTML = "";
+          if (!layers.length) {
+            tableBody.innerHTML = '<tr><td colspan="9">Nenhuma camada encontrada</td></tr>';
+            return;
+          }
+
+          layers.forEach(layer => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+            <td>${layer.id}</td>
+            <td>${layer.image ? `<img src="http://localhost:8080/${layer.image}" alt="Parallax">` : "-"}</td>
+            <td>${layer.speed ?? "-"}</td>
+            <td>${layer.displayOrder ?? "-"}</td>
+            <td>${layer.createdByUsername ?? "-"}</td>
+            <td>${layer.updatedByUsername ?? "-"}</td>
+            <td>${layer.createdAt ?? "-"}</td>
+            <td>${layer.updatedAt ?? "-"}</td>
+            <td>
+              <button onclick="updateLayer(${layer.id})">Editar</button>
+              <button onclick="deleteLayer(${layer.id})">Deletar</button>
+            </td>
+          `;
+            tableBody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          tableBody.innerHTML = `<tr><td colspan="9">Erro: ${err.message}</td></tr>`;
+        });
+    }
+
+    function updateLayer(id) {
+      window.location.href = `update.html?gameId=${gameId}&sectionId=${sectionId}&layerId=${id}`;
+    }
+
+    async function deleteLayer(id) {
+      if (!confirm("Tem certeza que deseja deletar esta camada?")) return;
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/section/parallax-layer/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          alert("Camada deletada com sucesso!");
+          location.reload();
+        } else {
+          const error = await res.json();
+          alert("Erro ao deletar: " + (error.message || res.status));
+        }
+      } catch (err) {
+        alert("Erro: " + err.message);
+      }
+    }
+  </script>
+
+
+
+</body>
+
+</html>

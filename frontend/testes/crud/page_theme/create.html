@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testar Criação de PageTheme</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input,
+        select {
+            padding: 5px;
+            width: 200px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Criar PageTheme</h1>
+
+    <a href="read.html">⬅ Voltar para Theme</a>
+    <form id="pageThemeForm">
+        <label>Nome do Tema*:
+            <input type="text" name="name" required>
+        </label>
+        <label>Cor de Fundo:
+            <input type="color" name="backgroundColor">
+        </label>
+        <label>Cor do Ícone:
+            <input type="color" name="iconColor">
+        </label>
+        <label>Cor do Título:
+            <input type="color" name="titleColor">
+        </label>
+        <label>Cor do Parágrafo:
+            <input type="color" name="paragraphColor">
+        </label>
+        <label>Peso do Título:
+            <select name="titleWeight">
+                <option value="">Selecione</option>
+                <option value="normal">Normal</option>
+                <option value="bold">Bold</option>
+            </select>
+        </label>
+        <label>Peso do Parágrafo:
+            <select name="paragraphWeight">
+                <option value="">Selecione</option>
+                <option value="normal">Normal</option>
+                <option value="bold">Bold</option>
+            </select>
+        </label>
+        <label>Fonte do Título:
+            <input type="text" name="titleFont">
+        </label>
+        <label>Fonte do Parágrafo:
+            <input type="text" name="paragraphFont">
+        </label>
+        <label>Tamanho do Título:
+            <input type="number" name="titleSize" min="1">
+        </label>
+        <label>Tamanho do Parágrafo:
+            <input type="number" name="paragraphSize" min="1">
+        </label>
+        <button type="submit">Criar Tema</button>
+    </form>
+
+    <div class="response" id="response"></div>
+
+    <script>
+        const form = document.getElementById('pageThemeForm');
+        const responseDiv = document.getElementById('response');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Converte números para integer
+            if (data.titleSize) data.titleSize = parseInt(data.titleSize);
+            if (data.paragraphSize) data.paragraphSize = parseInt(data.paragraphSize);
+
+            // Pega o token do localStorage
+            const token = localStorage.getItem('token');
+
+            try {
+                const res = await fetch('http://localhost:8080/api/theme', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // envia token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (err) {
+                responseDiv.textContent = 'Erro ao criar tema: ' + err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,10 +1,10 @@
 package br.com.firedroid.DTOs.game;
 
-import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 
 public record GameRequest(
     @NotBlank(message = "O nome é obrigatório")
@@ -14,19 +14,11 @@ public record GameRequest(
     @NotBlank(message = "A descrição é obrigatória")
     String description,
 
-    @NotBlank(message = "A imagem é obrigatória")
-    @URL(message = "URL da imagem inválida")
-    String imageUrl,
-    
-    @URL(message = "Link da Steam inválido")
-    String steamLink,
+    @NotNull(message = "O gameIcon é obrigatório")
+    MultipartFile gameBanner,
 
-    @URL(message = "Link da Epic Games inválido")
-    String epicLink,
+    @NotNull(message = "O gameIcon é obrigatório")
+    MultipartFile gameIcon,
 
-    @URL(message = "Link do Itch.io inválido")
-    String itchioLink,
-
-    @URL(message = "Link do site inválido")
-    String siteLink
+    Long pageThemeId
 ) {}

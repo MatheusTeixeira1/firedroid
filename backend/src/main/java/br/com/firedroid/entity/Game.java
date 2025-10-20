@@ -21,21 +21,16 @@ public class Game implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@Column(name = "image_url")
-	private String image;
+	@Column(name = "game_banner")
+	private String gameBanner;
 
-	@Column(name = "steam_link")
-	private String steamLink;
+	@Column(name = "game_icon")
+	private String gameIcon;
 
-	@Column(name = "epic_link")
-	private String epicLink;
-
-	@Column(name = "itchio_link")
-	private String itchioLink;
-
-	@Column(name = "site_link")
-	private String siteLink;
-
+	@OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("displayOrder ASC")
+	private List<GameDistributors> distributors;
+	
 	@OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("displayOrder ASC")
 	private List<GameSection> sections;
@@ -43,10 +38,6 @@ public class Game implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "page_theme", nullable = false)
 	private PageTheme pageTheme;
-	
-//	@ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "game_id", nullable = false)
-//    private FeaturedGames featured;
 	
 //	----- Auditoria -----
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -135,44 +126,28 @@ public class Game implements Serializable {
 		this.description = description;
 	}
 
-	public String getImage() {
-		return image;
+	public String getGameBanner() {
+		return gameBanner;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
+	public void setGameBanner(String gameBanner) {
+		this.gameBanner = gameBanner;
 	}
 
-	public String getSteamLink() {
-		return steamLink;
+	public String getGameIcon() {
+		return gameIcon;
 	}
 
-	public void setSteamLink(String steamLink) {
-		this.steamLink = steamLink;
+	public void setGameIcon(String gameIcon) {
+		this.gameIcon= gameIcon;
+	}
+	
+	public List<GameDistributors> getDistributors() {
+		return distributors;
 	}
 
-	public String getEpicLink() {
-		return epicLink;
-	}
-
-	public void setEpicLink(String epicLink) {
-		this.epicLink = epicLink;
-	}
-
-	public String getItchioLink() {
-		return itchioLink;
-	}
-
-	public void setItchioLink(String itchioLink) {
-		this.itchioLink = itchioLink;
-	}
-
-	public String getSiteLink() {
-		return siteLink;
-	}
-
-	public void setSiteLink(String siteLink) {
-		this.siteLink = siteLink;
+	public void setDistributors(List<GameDistributors> distributors) {
+		this.distributors = distributors;
 	}
 
 	public List<GameSection> getSections() {

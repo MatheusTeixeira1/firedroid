@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Seção</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    textarea {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Criar Seção</h1>
+
+  <a id="backLink">⬅ Voltar para Seções</a>
+
+  <form id="sectionForm">
+    <label>Título*:
+      <input type="text" name="title" maxlength="200" required>
+    </label>
+
+    <label>Texto*:
+      <textarea name="text" rows="4" required></textarea>
+    </label>
+
+    <label>Ordem de Exibição*:
+      <input type="number" name="displayOrder" min="1" required>
+    </label>
+
+    <button type="submit">Criar Seção</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById("sectionForm");
+    const responseDiv = document.getElementById("response");
+
+    // Pega gameId da URL obrigatoriamente
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+
+    const backLink = document.getElementById("backLink");
+    backLink.href = `read.html?gameId=${gameId}`;
+
+    if (!gameId) {
+      responseDiv.textContent = "ID do jogo não fornecido na URL (?gameId=).";
+      form.style.display = "none"; // esconde formulário
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+        return;
+      }
+
+      // Monta os dados como JSON
+      const formData = new FormData(form);
+      const sectionData = Object.fromEntries(formData.entries());
+      sectionData.displayOrder = parseInt(sectionData.displayOrder);
+      sectionData.gameId = parseInt(gameId);
+
+      try {
+        const res = await fetch("http://localhost:8080/api/game/section", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(sectionData)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          throw new Error(result.message || `Erro HTTP ${res.status}`);
+        }
+
+        responseDiv.textContent = JSON.stringify(result.message || "Seção criada com sucesso!", null, 2);
+        form.reset();
+      } catch (err) {
+        responseDiv.textContent = "Erro ao criar seção: " + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

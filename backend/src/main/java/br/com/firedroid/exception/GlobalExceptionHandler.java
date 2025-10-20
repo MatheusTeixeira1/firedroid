@@ -56,7 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(DuplicateIdentifierException.class)
-	private ResponseEntity<ErrorMessage> handDuplicateIdentifier(DuplicateIdentifierException e) {
+	private ResponseEntity<ErrorMessage> handleDuplicateIdentifier(DuplicateIdentifierException e) {
 		ErrorMessage error = new ErrorMessage(HttpStatus.CONFLICT, e.getMessage());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
 	}

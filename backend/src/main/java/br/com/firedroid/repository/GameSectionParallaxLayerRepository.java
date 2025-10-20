@@ -6,6 +6,9 @@ import br.com.firedroid.entity.GameSection;
 import br.com.firedroid.entity.GameSectionParallaxLayer;
 
 public interface GameSectionParallaxLayerRepository  extends JpaRepository<GameSectionParallaxLayer, Long> {
+
+    boolean existsByGameSectionAndDisplayOrderAndIdNot(GameSection section, Integer displayOrder, Long id);
+
 	boolean existsByGameSectionAndDisplayOrder(GameSection section, int displayOrder);
 }
 

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Camada Parallax</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Editar Camada Parallax</h1>
+
+  <a id="backLink" href="index.html">⬅ Voltar para Seções</a>
+
+  <form id="parallaxForm">
+    <label>Imagem (se quiser alterar):
+      <input type="file" name="image" accept="image/*">
+    </label>
+
+    <label>Velocidade*:
+      <input type="number" step="0.1" name="speed" required>
+    </label>
+
+    <label>Ordem de exibição*:
+      <input type="number" name="displayOrder" required>
+    </label>
+
+    <button type="submit">Salvar Alterações</button>
+  </form>
+
+  <div class="response" id="response"></div>
+
+  <script>
+    const form = document.getElementById('parallaxForm');
+    const responseDiv = document.getElementById('response');
+    const backLink = document.getElementById("backLink");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+    const sectionId = urlParams.get("sectionId");
+    const layerId = urlParams.get("layerId");
+
+    if (sectionId) {
+      backLink.href = `read.html?gameId=${gameId}&sectionId=${sectionId}`;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      responseDiv.textContent = "Token não encontrado. Faça login primeiro.";
+    } else {
+      // Preencher formulário com os dados atuais
+      fetch(`http://localhost:8080/api/game/section/parallax-layer/${layerId}/adm`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(async res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(layer => {
+          form.speed.value = layer.speed ?? "";
+          form.displayOrder.value = layer.displayOrder ?? "";
+        })
+        .catch(err => {
+          responseDiv.style.color = "red";
+          responseDiv.textContent = "Erro ao carregar camada: " + err.message;
+        });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.append("sectionId", sectionId); // necessário para o backend
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/section/parallax-layer/${layerId}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` }, // NÃO setar Content-Type
+          body: formData
+        });
+
+        if (res.ok) {
+          responseDiv.style.color = "green";
+          responseDiv.textContent = "Camada atualizada com sucesso!";
+        } else {
+          const result = await res.json();
+          responseDiv.style.color = "red";
+          responseDiv.textContent = "Erro: " + (result.message || res.status);
+        }
+      } catch (err) {
+        responseDiv.style.color = "red";
+        responseDiv.textContent = 'Erro ao atualizar camada: ' + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>

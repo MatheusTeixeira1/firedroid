@@ -9,8 +9,8 @@
         :root {
             --header-height: 8vh;
             --game-main-image: url('../assets/background.png');
-            --game-primary-color: rgba(12, 54, 54);
-            --game-primary-color-90: rgba(12, 54, 54, 0.9);
+            --game-primary-color: #0c3636;
+            --game-primary-color-90: #0c3636e6;
             --game-primary-color-40: rgba(12, 54, 54, 0.4);
             --game-text-color: #f6f1ee;
             --game-title-color: #b7e2a9;
@@ -389,32 +389,18 @@
 
                 featuredGames = await response.json();
                 currentGame = featuredGames[0];
+                updateGame(currentGame);
 
                 featuredGames.forEach((game, index) => {
                     const button = document.createElement("button");
                     button.classList.add("game-selector-btn");
 
                     button.addEventListener("click", () => {
-                        // remove a classe de todos
                         document.querySelectorAll(".game-selector-btn")
                             .forEach(btn => btn.classList.remove("game-selector-btn-active"));
-
-                        // adiciona só no clicado
                         button.classList.add("game-selector-btn-active");
-
-                        // renderiza o jogo
                         currentGame = featuredGames[index];
-                        primaryColor = currentGame.pageTheme.backgroundColor;
-                        // document.documentElement.style.setProperty('--game-primary-color', primaryColor);
-
-                        gameTitleColor = currentGame.pageTheme.titleColor;
-                        setRootProperty('--game-title-color', gameTitleColor)
-                        mainTitle.textContent = currentGame.name;
-                        mainDescription.textContent = currentGame.description;
-                        epicLink.href = currentGame.epicLink;
-                        steamLink.href = currentGame.steamLink;
-                        itchLink.href = currentGame.itchioLink;
-                        console.log(index + ": " + currentGame.name);
+                        updateGame(currentGame);
                     });
                     if (index === 0) {
                         button.classList.add("game-selector-btn-active");
@@ -428,12 +414,25 @@
             }
         });
 
-        function setRootProperty(name, value) {
-            document.documentElement.style.setProperty(name, value);
 
+        function updateGame(game) {
+            primaryColor = currentGame.pageTheme.backgroundColor;
+            // document.documentElement.style.setProperty('--game-primary-color', primaryColor);
+
+            gameTitleColor = currentGame.pageTheme.titleColor;
+            setRootProperty('--game-title-color', gameTitleColor)
+            mainTitle.textContent = currentGame.name;
+            mainDescription.textContent = currentGame.description;
+            epicLink.href = currentGame.epicLink;
+            steamLink.href = currentGame.steamLink;
+            itchLink.href = currentGame.itchioLink;
         }
 
 
+
+        function setRootProperty(name, value) {
+            document.documentElement.style.setProperty(name, value);
+        }
 
         // Função para carregar a fonte
         function loadGoogleFont() {

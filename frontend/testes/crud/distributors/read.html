@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Distribuidores do Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    img {
+      max-height: 50px;
+    }
+
+    a {
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    button {
+      margin: 2px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Distribuidores do Game</h1>
+    <a id="createLink" href="#">Criar Novo Distribuidor</a>
+  </div>
+
+  <a href="../game/read.html">⬅ Voltar para Games</a>
+
+  <table id="distributorsTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Link</th>
+        <th>Imagem</th>
+        <th>Ordem</th>
+        <th>Criado por</th>
+        <th>Atualizado por</th>
+        <th>Criado em</th>
+        <th>Atualizado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Distribuidores carregados via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    const tableBody = document.querySelector("#distributorsTable tbody");
+    const token = localStorage.getItem("token");
+
+    // Pegar o gameId da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get("gameId");
+
+    const createLink = document.getElementById("createLink");
+    if (gameId) {
+      createLink.href = `create.html?gameId=${gameId}`;
+    } else {
+      createLink.style.display = "none";
+    }
+
+    if (!token) {
+      tableBody.innerHTML = '<tr><td colspan="10">Token não encontrado. Faça login primeiro.</td></tr>';
+    } else {
+      fetch(`http://localhost:8080/api/game/distributors/distributorsbygameid/${gameId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(async res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return Array.isArray(data) ? data : (data ? [data] : []);
+        })
+        .then(distributors => {
+          tableBody.innerHTML = "";
+          if (!distributors.length) {
+            tableBody.innerHTML = '<tr><td colspan="10">Nenhum distribuidor encontrado</td></tr>';
+            return;
+          }
+
+          distributors.forEach(dist => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+              <td>${dist.id}</td>
+              <td>${dist.name ?? "-"}</td>
+              <td>${dist.link ? `<a href="${dist.link}" target="_blank">${dist.link}</a>` : "-"}</td>
+              <td>${dist.image ? `<img src="http://localhost:8080/${dist.image}" alt="Imagem">` : "-"}</td>
+              <td>${dist.displayOrder ?? "-"}</td>
+              <td>${dist.createdByUsername ?? "-"}</td>
+              <td>${dist.updatedByUsername ?? "-"}</td>
+              <td>${dist.createdAt ?? "-"}</td>
+              <td>${dist.updatedAt ?? "-"}</td>
+              <td>
+                <button onclick="updateDistributor(${dist.id})">Editar</button>
+                <button onclick="deleteDistributor(${dist.id})">Deletar</button>
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          tableBody.innerHTML = `<tr><td colspan="10">Erro: ${err.message}</td></tr>`;
+        });
+    }
+
+    function updateDistributor(distributorId) {
+      window.location.href = `update.html?gameId=${gameId}&distributorId=${distributorId}`;
+    }
+
+    async function deleteDistributor(id) {
+      if (!confirm("Tem certeza que deseja deletar este distribuidor?")) return;
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/game/distributors/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          alert("Distribuidor deletado com sucesso!");
+          location.reload();
+        } else {
+          const error = await res.json();
+          alert("Erro ao deletar: " + (error.message || res.status));
+        }
+      } catch (err) {
+        alert("Erro: " + err.message);
+      }
+    }
+  </script>
+</body>
+
+</html>
